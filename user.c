@@ -59,26 +59,26 @@ int main(int argc, char* argv[]) {
 
 		if(chance > 0 && chance < 63) {
 			shmPtr->resources.requestF = 1;
-			strcpy(message.mtext,"Request");
+			//strcpy(message.mtext,"Request");
 
 
 		} else if(chance > 62 && chance < 93) {
 			shmPtr->resources.releaseF = 1;
-			strcpy(message.mtext,"Release");
+			//strcpy(message.mtext,"Release");
 
 		} else if(chance > 92 && chance  < 101) {	
 			shmPtr->resources.termF = 1;
-			strcpy(message.mtext,"Terminated");
+			//strcpy(message.mtext,"Terminated");
 			terminate = 1;
 			//shmPtr->resources.termF = 1;
 		}
 	
-		message.myType = 2;	
+		/*message.myType = 2;	
 			
 		if(msgsnd(messageQueueId, &message,sizeof(message)+1,0) == -1) {
 			perror("msgsnd");
 			exit(1);
-		} 
+		} */
 
 		exit(0);
 	

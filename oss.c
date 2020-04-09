@@ -219,10 +219,10 @@ int main(int argc, char* argv[]) {
 			
 						}
 			
-						if (msgrcv(messageQueueId, &message,sizeof(message)+1,2,0) == -1) {
+						/*if (msgrcv(messageQueueId, &message,sizeof(message)+1,2,0) == -1) {
 							perror("msgrcv");
 
-						}	
+						}*/	
 
 						if(shmPtr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
 						{
@@ -304,10 +304,10 @@ int main(int argc, char* argv[]) {
 							num = 0;		
 							//initializeQueueArray();
 							int i = 0;
-	for(i = 0; i <20; i++)
-	{
-		queueArray[i] = -1;
-	}		
+							for(i = 0; i <20; i++)
+							{
+								queueArray[i] = -1;
+							}		
 							blockPos = 0;
 						}
 			}
