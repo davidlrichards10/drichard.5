@@ -124,8 +124,6 @@ int main(int argc, char* argv[]) {
 	srand((unsigned) time(&t));
 	int totalCount = 0;
 	int blockPos = 0;
-		
-	generateLaunch(randomInterval());
 
 	generateMaxResource();
 
@@ -153,23 +151,15 @@ int main(int argc, char* argv[]) {
         }
 
 	alarm(timer);
-	while(totalCount < maxChildProcess || ptr_count > 0){ 					
-			
-			shmPtr->clockInfo.nanoSeconds += 20000;
-			if(shmPtr->clockInfo.nanoSeconds > 1000000000){
-				shmPtr->clockInfo.seconds++;
-				shmPtr->clockInfo.nanoSeconds -= 1000000000;
-			}				
-		
+	while(totalCount < maxChildProcess || ptr_count > 0){ 							
 		
 			if(waitpid(childpid,NULL, WNOHANG)> 0){
 				ptr_count--;
 			}
 
 
-			if(ptr_count < 18 && shmPtr->clockInfo.seconds == launchTime.seconds && shmPtr->clockInfo.nanoSeconds > launchTime.nanoSeconds){	
-				
-
+			if(ptr_count < 18 )
+				{			
 						int l;	
 						
 						for(l=0; l<18;l++){
@@ -235,9 +225,9 @@ int main(int argc, char* argv[]) {
 
 						}	
 
-						if(strcmp(message.mtext, "Request") == 0 )
+						if(shmPtr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
 						{
-	
+							shmPtr->resources.requestF = 0;
 							int results = generateRequest(fakePid);
 							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results,shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds );
 							
@@ -263,7 +253,6 @@ int main(int argc, char* argv[]) {
 								blockPos++;					
 
 							} else {
-								generateInterval(randomIntervalLaunch());
 								addRequestToAllocated(fakePid, results);
 
 									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",fakePid, results, shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds);
@@ -275,20 +264,19 @@ int main(int argc, char* argv[]) {
 						}	
 						}
 
-						if(strcmp(message.mtext, "Terminated") == 0 )
+						if(shmPtr->resources.termF == 1)//strcmp(message.mtext, "Terminated") == 0 )
 						{
+							shmPtr->resources.termF = 0;
 							trackProcessTerminated++;
-							generateInterval(randomIntervalLaunch());
-							
 							fprintf(fp,"Master terminating P%d at %d:%d\n\n",fakePid, shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds);
 							nonTerminated[fakePid] = -1;
 
 							release(fakePid,0);
 						}
 
-						if(strcmp(message.mtext, "Release") == 0 )
+						if(shmPtr->resources.releaseF == 1)//strcmp(message.mtext, "Release") == 0 )
 						{
-							generateInterval(randomIntervalLaunch());
+							shmPtr->resources.releaseF = 0;
 							release(fakePid,0);
 						}
 
@@ -318,10 +306,6 @@ int main(int argc, char* argv[]) {
 							initializeQueueArray();
 							blockPos = 0;
 						}
-		
-			
-						generateLaunch(randomInterval());								
-
 			}
 		}
 	detach();
@@ -554,29 +538,6 @@ void generateMaxResource()
 		shmPtr->resources.max[i] = randomResources();
 	}
 }
-
-
-void generateInterval(int addInterval)
-{
-	shmPtr->clockInfo.nanoSeconds += addInterval;
-	
-	if(shmPtr->clockInfo.nanoSeconds > 1000000000)
-	{
-		shmPtr->clockInfo.seconds++;
-		shmPtr->clockInfo.nanoSeconds -= 1000000000;
-	}
-}
-
-void generateLaunch(int addInterval) 
-{
-	launchTime.nanoSeconds += addInterval;
-	
-	if(launchTime.nanoSeconds > 1000000000)
-	{
-		launchTime.seconds++;
-		launchTime.nanoSeconds -= 1000000000;
-	}						
-} 
 
 int  randomIntervalLaunch() 
 {

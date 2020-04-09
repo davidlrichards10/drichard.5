@@ -26,11 +26,14 @@ struct mesgQ {
 typedef struct {
 	int max[20];
 	int available[20];
+	int termF;
+        int requestF;
+        int releaseF;
 } Resource;
 
 typedef struct {
-       int allocated[20];
-       int request[20];
+       	int allocated[20];
+       	int request[20];
 	int isTerminated;
 } ResourceDescriptor;
 
