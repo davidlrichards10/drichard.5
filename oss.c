@@ -1,3 +1,17 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <signal.h>
+#include <ctype.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/msg.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <semaphore.h>
+#include <sys/shm.h>
+#include <fcntl.h>
+#include <time.h>
 #include "shared.h"
 
 typedef struct message {

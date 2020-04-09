@@ -1,17 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <signal.h>
-#include <ctype.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/msg.h>
-#include <sys/types.h>
-#include <sys/wait.h>	
-#include <semaphore.h>
-#include <sys/shm.h>
-#include <fcntl.h>
-#include <time.h>
+#ifndef SHARED_H
+#define SHARED_H
 
 typedef struct clock {
 	int seconds;
@@ -48,3 +36,5 @@ typedef struct shared_memory_object {
     Resource resources;
     Clock clockInfo;
 } SharedMemory; 
+
+#endif
