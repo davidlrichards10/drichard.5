@@ -1,0 +1,17 @@
+commit e644fe1dec869aef8c2fd597c0605481d18f0dc6
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Thu Apr 9 13:31:42 2020 -0500
+
+    used flags to detect term,request,release
+
+commit 70743ec67b05f748f424d0a4300c213a5b1bf061
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sun Apr 5 16:12:29 2020 -0500
+
+    setup clock in shared memory and fork at random times
+
+commit 6b12f78b5bbafee870f3f3e26ebcfd814dfd05e9
+Author: davidlrichards10 <62032455+davidlrichards10@users.noreply.github.com>
+Date:   Sun Apr 5 13:35:16 2020 -0500
+
+    Create README
