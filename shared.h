@@ -1,15 +1,15 @@
 #ifndef SHARED_H
 #define SHARED_H
 
-typedef struct clock {
-	int seconds;
-	int nanoSeconds;
-} Clock;
-
 struct mesgQ {
     long mType;
     char mText[100];
 } messenger;
+
+struct time{
+	int nanoseconds;
+	int seconds;
+};
 
 typedef struct {
 	int max[20];
@@ -31,10 +31,10 @@ typedef struct {
 } DeadLock;
 
 typedef struct shared_memory_object {
-    ResourceDescriptor resourceDescriptor[18 + 1];
-    DeadLock deadLock[18 + 1];
-    Resource resources;
-    Clock clockInfo;
+    	ResourceDescriptor resourceDescriptor[18 + 1];
+    	DeadLock deadLock[18 + 1];
+    	Resource resources;
+	struct time time;
 } SharedMemory; 
 
 #endif

@@ -19,12 +19,8 @@ typedef struct message {
     char mtext[512];
 } Message;
 
-
-void signalCall(int signum);
-
 int shmid; 
 SharedMemory* shmPtr;
-Clock launchTime;
 
 int shareable[4];
 int queueArray[20];
@@ -46,6 +42,8 @@ void checkDeadLockDetection();
 void addRequestToAllocated(int fakePid, int results);
 void detach();
 void sigErrors();
+void addClock(struct time* time, int sec, int ns);
+
 int generateRequest(int fakePid);
 
 char outputFileName[] = "log";
@@ -91,7 +89,7 @@ int main(int argc, char* argv[]) {
 	char errorMessage[bufSize];
 	Message message;
 
-
+	srand(time(NULL));
 	int ptr_count = 0;
 	
 
@@ -106,17 +104,12 @@ int main(int argc, char* argv[]) {
        		 exit(errno);
     	}
   
-	 shmPtr = shmat(shmid, NULL, 0);
-  	 shmPtr->clockInfo.seconds = 0; 
-   	 shmPtr->clockInfo.nanoSeconds = 0;  
+	shmPtr = shmat(shmid, NULL, 0);
 
 	pid_t childpid;
 
 	int fakePid = 0;
-	shmPtr->clockInfo.nanoSeconds = 0;
-	shmPtr->clockInfo.seconds = 0;
 
-	//srand(NULL);
  	time_t t;
 	srand((unsigned) time(&t));
 	int totalCount = 0;
@@ -163,6 +156,13 @@ int main(int argc, char* argv[]) {
                 exit(0);
         }
 
+	struct time randFork;
+	struct time deadLockCheck;
+	deadLockCheck.seconds = 1;
+
+	/*int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
+	addClock(&randFork,0,nextFork);
+	*/
 	alarm(timer);
 	while(totalCount < maxChildProcess || ptr_count > 0){ 							
 		
@@ -170,11 +170,18 @@ int main(int argc, char* argv[]) {
 				ptr_count--;
 			}
 
-
-			if(ptr_count < 18 )
-				{			
-						int l;	
+			addClock(&shmPtr->time,0,100000);
+			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
+			addClock(&randFork,0,nextFork);
+			if(ptr_count < 18 && shmPtr->time.nanoseconds < nextFork) 
+			{			
 						
+						/*randFork.seconds = shmPtr->time.seconds;
+						randFork.nanoseconds = shmPtr->time.nanoseconds;
+						nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
+						addClock(&randFork,0,nextFork);		
+						*/
+						int l;	
 						for(l=0; l<18;l++){
 							if(nonTerminated[l] == -1){
 								terminatedNumber++;					
@@ -242,13 +249,13 @@ int main(int argc, char* argv[]) {
 						{
 							shmPtr->resources.requestF = 0;
 							int results = generateRequest(fakePid);
-							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results,shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds );
+							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
 							
 							int resultBlocked = ifBlockResources(fakePid,results);
 
 							if(resultBlocked == 0){
 
-									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",fakePid, results,shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds );
+									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
 								
 								int f, duplicate = 0;
 								for(f=0; f< 18; f++){
@@ -268,7 +275,7 @@ int main(int argc, char* argv[]) {
 							} else {
 								addRequestToAllocated(fakePid, results);
 
-									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",fakePid, results, shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds);
+									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
 								if(requestNumbers == 20){
 									requestNumbers = 0;
 								requestNumbers++;
@@ -281,7 +288,7 @@ int main(int argc, char* argv[]) {
 						{
 							shmPtr->resources.termF = 0;
 							//trackProcessTerminated++;
-							fprintf(fp,"Master terminating P%d at %d:%d\n\n",fakePid, shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds);
+							fprintf(fp,"Master terminating P%d at %d:%d\n",fakePid, shmPtr->time.seconds,shmPtr->time.nanoseconds);
 							nonTerminated[fakePid] = -1;
 
 							release(fakePid,0);
@@ -293,7 +300,9 @@ int main(int argc, char* argv[]) {
 							release(fakePid,0);
 						}
 
-					
+					//if(shmPtr->time.seconds == deadLockCheck.seconds)
+					//{
+						//deadLockCheck.seconds++;
 						if(num < 17)
 						{			
 							num++;	
@@ -310,8 +319,9 @@ int main(int argc, char* argv[]) {
 								}
 							}
 
-							if(w > 0)
+							if(w > 0 && shmPtr->time.seconds == deadLockCheck.seconds)
 							{
+								deadLockCheck.seconds++;
 								checkDeadLockDetection();
 							}
 
@@ -324,10 +334,20 @@ int main(int argc, char* argv[]) {
 							}		
 							blockPos = 0;
 						}
+					//}
 			}
 		}
 	detach();
 	return 0;
+}
+
+void addClock(struct time* time, int sec, int ns){
+	time->seconds += sec;
+	time->nanoseconds += ns;
+	while(time->nanoseconds >= 1000000000){
+		time->nanoseconds -=1000000000;
+		time->seconds++;
+	}
 }
 
 void detach()
@@ -407,7 +427,7 @@ void checkDeadLockDetection()
 {
 	//timesDeadlockRun++;
 	fprintf(fp,"\nCurrent system resources\n");
-	fprintf(fp,"Master running deadlock detection at time %d:%d\n",shmPtr->clockInfo.seconds, shmPtr->clockInfo.nanoSeconds);
+	fprintf(fp,"Master running deadlock detection at time %d:%d\n", shmPtr->time.seconds,shmPtr->time.nanoseconds);
 	int i = 0;
 	int manyBlock = 0;	
 	int average = 0;
@@ -452,7 +472,7 @@ void checkDeadLockDetection()
 		else 
 		{
 			addRequestToAllocated(queueArray[i], resultArray[i]);
-			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",queueArray[i], resultArray[i], shmPtr->clockInfo.seconds,shmPtr->clockInfo.nanoSeconds);
+			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",queueArray[i], resultArray[i], shmPtr->time.seconds,shmPtr->time.nanoseconds);
 
 		}
 	}	
