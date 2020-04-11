@@ -319,11 +319,11 @@ int main(int argc, char* argv[]) {
 								}
 							}
 
-							if(w > 0 && shmPtr->time.seconds == deadLockCheck.seconds)
+							/*if(shmPtr->time.seconds == deadLockCheck.seconds)
 							{
 								deadLockCheck.seconds++;
 								checkDeadLockDetection();
-							}
+							}*/
 
 							num = 0;		
 							//initializeQueueArray();
@@ -334,6 +334,12 @@ int main(int argc, char* argv[]) {
 							}		
 							blockPos = 0;
 						}
+						 if(shmPtr->time.seconds == deadLockCheck.seconds)
+                                                        {
+                                                                deadLockCheck.seconds++;
+                                                                checkDeadLockDetection();
+                                                        }
+
 					//}
 			}
 		}
@@ -486,7 +492,7 @@ void checkDeadLockDetection()
 
 int ifBlockResources(int fakePid, int result) 
 {
-	if(shmPtr->resources.available[result] >= shmPtr->resourceDescriptor[fakePid].request[result] )
+	if(shmPtr->resources.available[result] > 0)//>= shmPtr->resourceDescriptor[fakePid].request[result] )
 	{
 		return 1;
 	} 
