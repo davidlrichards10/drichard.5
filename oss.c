@@ -99,10 +99,10 @@ int main(int argc, char* argv[]) {
 	}
   
  
-	if ((messageQueueId = msgget(3000, IPC_CREAT | 0644)) == -1) {
+	/*if ((messageQueueId = msgget(3000, IPC_CREAT | 0644)) == -1) {
         	perror("Error: mssget");
        		 exit(errno);
-    	}
+    	}*/
   
 	shmPtr = shmat(shmid, NULL, 0);
 
@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
 
 						}
 	
-						message.myType = 1;
+						/*message.myType = 1;
 						char buffer1[100];
 						sprintf(buffer1, "%d", fakePid);
 						strcpy(message.mtext,buffer1);	
@@ -223,7 +223,7 @@ int main(int argc, char* argv[]) {
 							perror("msgsnd");
 							exit(1);
 						}
-						
+						*/
 						childpid=fork();
 
 						totalCount++;
@@ -334,7 +334,7 @@ int main(int argc, char* argv[]) {
 							}		
 							blockPos = 0;
 						}
-						 if(shmPtr->time.seconds == deadLockCheck.seconds)
+						if(shmPtr->time.seconds == deadLockCheck.seconds)
                                                         {
                                                                 deadLockCheck.seconds++;
                                                                 checkDeadLockDetection();
