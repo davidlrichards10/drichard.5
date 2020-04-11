@@ -28,13 +28,9 @@ int resultArray[20];
 static int messageQueueId;
 int times;
 int availableActive = 0;
-int randomresources();
-int randomInterval();
-int randomizeShareablePosition();
 int nonTerminated[20];
 int num = 0;
 int terminatedNumber = 0;	
-void signalCall(int signum);
 void userProcess();
 int ifBlockResources(int fakePid, int result);
 void release(int fakePid, int dl);
@@ -43,8 +39,6 @@ void addRequestToAllocated(int fakePid, int results);
 void detach();
 void sigErrors();
 void addClock(struct time* time, int sec, int ns);
-
-int generateRequest(int fakePid);
 
 char outputFileName[] = "log";
 FILE* fp;
@@ -98,12 +92,6 @@ int main(int argc, char* argv[]) {
         	exit(errno);
 	}
   
- 
-	/*if ((messageQueueId = msgget(3000, IPC_CREAT | 0644)) == -1) {
-        	perror("Error: mssget");
-       		 exit(errno);
-    	}*/
-  
 	shmPtr = shmat(shmid, NULL, 0);
 
 	pid_t childpid;
@@ -118,10 +106,10 @@ int main(int argc, char* argv[]) {
 	int i = 0;
 	for(i=0; i <20; i++)
 	{
-		shmPtr->resources.max[i] = randomResources();
+		shmPtr->resources.max[i] = rand() % (10 + 1 - 1) + 1;
 	}
 	for(i=0; i < 4; i++){
-		shareable[i] = randomizeShareablePosition();
+		shareable[i] = rand() % (19 + 0 - 0) + 0;
 	}
 	for(i=0; i <20; i++)
 	{
@@ -159,10 +147,7 @@ int main(int argc, char* argv[]) {
 	struct time randFork;
 	struct time deadLockCheck;
 	deadLockCheck.seconds = 1;
-
-	/*int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
-	addClock(&randFork,0,nextFork);
-	*/
+	
 	alarm(timer);
 	while(totalCount < maxChildProcess || ptr_count > 0){ 							
 		
@@ -175,12 +160,6 @@ int main(int argc, char* argv[]) {
 			addClock(&randFork,0,nextFork);
 			if(ptr_count < 18 && shmPtr->time.nanoseconds < nextFork) 
 			{			
-						
-						/*randFork.seconds = shmPtr->time.seconds;
-						randFork.nanoseconds = shmPtr->time.nanoseconds;
-						nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
-						addClock(&randFork,0,nextFork);		
-						*/
 						int l;	
 						for(l=0; l<18;l++){
 							if(nonTerminated[l] == -1){
@@ -214,16 +193,6 @@ int main(int argc, char* argv[]) {
 
 						}
 	
-						/*message.myType = 1;
-						char buffer1[100];
-						sprintf(buffer1, "%d", fakePid);
-						strcpy(message.mtext,buffer1);	
-			
-						if(msgsnd(messageQueueId, &message,sizeof(message)+1,0) == -1) {
-							perror("msgsnd");
-							exit(1);
-						}
-						*/
 						childpid=fork();
 
 						totalCount++;
@@ -248,7 +217,8 @@ int main(int argc, char* argv[]) {
 						if(shmPtr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
 						{
 							shmPtr->resources.requestF = 0;
-							int results = generateRequest(fakePid);
+							int results = rand() % (19 + 0 - 0) + 0;
+							shmPtr->resourceDescriptor[fakePid].request[results] = rand() % (10 + 1 - 1) + 1;
 							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
 							
 							int resultBlocked = ifBlockResources(fakePid,results);
@@ -300,9 +270,6 @@ int main(int argc, char* argv[]) {
 							release(fakePid,0);
 						}
 
-					//if(shmPtr->time.seconds == deadLockCheck.seconds)
-					//{
-						//deadLockCheck.seconds++;
 						if(num < 17)
 						{			
 							num++;	
@@ -319,14 +286,8 @@ int main(int argc, char* argv[]) {
 								}
 							}
 
-							/*if(shmPtr->time.seconds == deadLockCheck.seconds)
-							{
-								deadLockCheck.seconds++;
-								checkDeadLockDetection();
-							}*/
-
 							num = 0;		
-							//initializeQueueArray();
+							
 							int i = 0;
 							for(i = 0; i <20; i++)
 							{
@@ -482,10 +443,6 @@ void checkDeadLockDetection()
 
 		}
 	}	
-	
-	//average = numTerminatedDeadLock / manyBlock;
-	//averageDeadlock += average;
-	
 	fprintf(fp,"System is no longer in deadlock\n");
 	fprintf(fp,"\n");
 }
@@ -514,43 +471,6 @@ void addRequestToAllocated(int fakePid, int results)
 		shmPtr->resources.available[results] = shmPtr->resources.available[results] - shmPtr->resourceDescriptor[fakePid].request[results];
 	}
 	shmPtr->resourceDescriptor[fakePid].allocated[results] = shmPtr->resourceDescriptor[fakePid].request[results];
-}
-
-int  generateRequest(int fakePid) 
-{
-	int resourcesLoc = rand() % (19 + 0 - 0) + 0;
-	shmPtr->resourceDescriptor[fakePid].request[resourcesLoc] = rand() % (10 + 1 - 1) + 1;
-	return resourcesLoc;
-}
-
-int  randomIntervalLaunch() 
-{
-	int times = 0; 
-	times = rand() % (25000000 + 1 - 1) + 1;
-	return times;
-}
-
-int  randomInterval() 
-{
-	int times = 0; 
-	times = rand() % (50000000 + 1 - 1) + 1;
-	return times;
-}
-
-
-int randomResources() 
-{
-	int resources = 0;
-	resources = rand() % (10 + 1 - 1) + 1;
-	return resources;
-}
-
-
-int randomizeShareablePosition() 
-{
-	int shareable = 0;
-	shareable = rand() % (19 + 0 - 0) + 0;
-	return shareable;
 }
 
 
