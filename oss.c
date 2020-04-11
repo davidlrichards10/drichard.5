@@ -155,9 +155,10 @@ int main(int argc, char* argv[]) {
 				ptr_count--;
 			}
 
-			addClock(&shmPtr->time,0,100000);
+			addClock(&shmPtr->time,0,190000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 			addClock(&randFork,0,nextFork);
+			
 			if(ptr_count < 18 && shmPtr->time.nanoseconds < nextFork) 
 			{			
 						int l;	
@@ -286,6 +287,12 @@ int main(int argc, char* argv[]) {
 								}
 							}
 
+							if(w > 0 )//&& shmPtr->time.seconds == deadLockCheck.seconds)
+							{
+								deadLockCheck.seconds++;
+                                                                checkDeadLockDetection();
+							}
+
 							num = 0;		
 							
 							int i = 0;
@@ -294,12 +301,8 @@ int main(int argc, char* argv[]) {
 								queueArray[i] = -1;
 							}		
 							blockPos = 0;
+						
 						}
-						if(shmPtr->time.seconds == deadLockCheck.seconds)
-                                                        {
-                                                                deadLockCheck.seconds++;
-                                                                checkDeadLockDetection();
-                                                        }
 
 					//}
 			}
@@ -449,7 +452,7 @@ void checkDeadLockDetection()
 
 int ifBlockResources(int fakePid, int result) 
 {
-	if(shmPtr->resources.available[result] > 0)//>= shmPtr->resourceDescriptor[fakePid].request[result] )
+	if(shmPtr->resources.available[result] > 0)//= shmPtr->resourceDescriptor[fakePid].request[result] )
 	{
 		return 1;
 	} 
