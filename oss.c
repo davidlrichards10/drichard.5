@@ -14,11 +14,6 @@
 #include <time.h>
 #include "shared.h"
 
-typedef struct message {
-    long myType;
-    char mtext[512];
-} Message;
-
 int shmid; 
 SharedMemory* ptr;
 
@@ -47,7 +42,8 @@ int main(int argc, char* argv[]) {
 	int timer = 10;
 	while((c=getopt(argc, argv, "v:i:t:h"))!= EOF)
 	{
-		switch(c){
+		switch(c)
+		{
 			case 'h':
 				printf("\nInvocation: oss [-h] [-i x -v x -t x]\n");
                 		printf("------------------------------------------Program Options-----------------------------------\n");
@@ -75,12 +71,8 @@ int main(int argc, char* argv[]) {
 	fp = fopen(outputFileName, "w");
 	
 	maxPro = 100;
-	int bufSize = 200;
-	char errorMessage[bufSize];
-	Message message;
-
 	srand(time(NULL));
-	int ptr_count = 0;
+	int count = 0;
 	
 
 	if ((shmid = shmget(9784, sizeof(SharedMemory), IPC_CREAT | 0600)) < 0) {
@@ -145,17 +137,17 @@ int main(int argc, char* argv[]) {
 	deadLockCheck.seconds = 1;
 	
 	alarm(timer);
-	while(totalCount < maxPro || ptr_count > 0){ 							
+	while(totalCount < maxPro || count > 0){ 							
 		
 			if(waitpid(cpid,NULL, WNOHANG)> 0){
-				ptr_count--;
+				count--;
 			}
 
 			addClock(&ptr->time,0,190000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 			addClock(&randFork,0,nextFork);
 			
-			if(ptr_count < 18 && ptr->time.nanoseconds < nextFork) 
+			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{			
 						int l;	
 						for(l=0; l<18;l++){
@@ -172,44 +164,37 @@ int main(int argc, char* argv[]) {
 							termed = 0;
 						}
 
-						if(stillActive[num] != -1){
-							pid = stillActive[num];
+						if(stillActive[pidNum] != -1){
+							pid = stillActive[pidNum];
 						} else {	
 							
-							int s = num;
-							for(s=num; s<18;s++){
+							int s = pidNum;
+							for(s=pidNum; s<18;s++){
 								if(stillActive[s] == -1){
-									num++;
+									pidNum++;
 								} else {
 									break;
 								}
 
 							}
 							
-							pid = stillActive[num];
+							pid = stillActive[pidNum];
 
 						}
 	
 						cpid=fork();
 
 						totalCount++;
-						ptr_count++;
+						count++;
 		
 						if(cpid < 0) {
 							perror("Fork failed");
 						} else if(cpid == 0) {		
 							execl("./user", "user",NULL);
-							snprintf(errorMessage, sizeof(errorMessage), "%s: Error: ", argv[0]);
-	    	 					perror(errorMessage);		
 							exit(0);
 						} else {
 			
 						}
-			
-						/*if (msgrcv(messageQueueId, &message,sizeof(message)+1,2,0) == -1) {
-							perror("msgrcv");
-
-						}*/	
 
 						if(ptr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
 						{
