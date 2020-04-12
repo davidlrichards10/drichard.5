@@ -20,7 +20,7 @@ typedef struct message {
 } Message;
 
 int shmid; 
-SharedMemory* shmPtr;
+SharedMemory* ptr;
 
 int shareable[4];
 int queueArray[20];
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
         	exit(errno);
 	}
   
-	shmPtr = shmat(shmid, NULL, 0);
+	ptr = shmat(shmid, NULL, 0);
 
 	pid_t childpid;
 
@@ -106,21 +106,21 @@ int main(int argc, char* argv[]) {
 	int i = 0;
 	for(i=0; i <20; i++)
 	{
-		shmPtr->resources.max[i] = rand() % (10 + 1 - 1) + 1;
+		ptr->resources.max[i] = rand() % (10 + 1 - 1) + 1;
 	}
 	for(i=0; i < 4; i++){
 		shareable[i] = rand() % (19 + 0 - 0) + 0;
 	}
 	for(i=0; i <20; i++)
 	{
-		shmPtr->resources.available[i] = shmPtr->resources.max[i];
+		ptr->resources.available[i] = ptr->resources.max[i];
 	}
 	int j = 0;
 	for(j=0; j < 18; j++) 
 	{
 		for(i = 0; i < 20; i++) 
 		{	
-			shmPtr->resourceDescriptor[j].allocated[i] = 0;
+			ptr->resourceDescriptor[j].allocated[i] = 0;
 		}
 
 	}
@@ -155,11 +155,11 @@ int main(int argc, char* argv[]) {
 				ptr_count--;
 			}
 
-			addClock(&shmPtr->time,0,190000);
+			addClock(&ptr->time,0,190000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 			addClock(&randFork,0,nextFork);
 			
-			if(ptr_count < 18 && shmPtr->time.nanoseconds < nextFork) 
+			if(ptr_count < 18 && ptr->time.nanoseconds < nextFork) 
 			{			
 						int l;	
 						for(l=0; l<18;l++){
@@ -215,18 +215,18 @@ int main(int argc, char* argv[]) {
 
 						}*/	
 
-						if(shmPtr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
+						if(ptr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
 						{
-							shmPtr->resources.requestF = 0;
+							ptr->resources.requestF = 0;
 							int results = rand() % (19 + 0 - 0) + 0;
-							shmPtr->resourceDescriptor[fakePid].request[results] = rand() % (10 + 1 - 1) + 1;
-							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
+							ptr->resourceDescriptor[fakePid].request[results] = rand() % (10 + 1 - 1) + 1;
+							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results, ptr->time.seconds,ptr->time.nanoseconds);
 							
 							int resultBlocked = ifBlockResources(fakePid,results);
 
 							if(resultBlocked == 0){
 
-									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
+									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",fakePid, results, ptr->time.seconds,ptr->time.nanoseconds);
 								
 								int f, duplicate = 0;
 								for(f=0; f< 18; f++){
@@ -246,7 +246,7 @@ int main(int argc, char* argv[]) {
 							} else {
 								addRequestToAllocated(fakePid, results);
 
-									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",fakePid, results, shmPtr->time.seconds,shmPtr->time.nanoseconds);
+									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",fakePid, results, ptr->time.seconds,ptr->time.nanoseconds);
 								if(requestNumbers == 20){
 									requestNumbers = 0;
 								requestNumbers++;
@@ -255,19 +255,19 @@ int main(int argc, char* argv[]) {
 						}	
 						}
 
-						if(shmPtr->resources.termF == 1)//strcmp(message.mtext, "Terminated") == 0 )
+						if(ptr->resources.termF == 1)//strcmp(message.mtext, "Terminated") == 0 )
 						{
-							shmPtr->resources.termF = 0;
+							ptr->resources.termF = 0;
 							//trackProcessTerminated++;
-							fprintf(fp,"Master terminating P%d at %d:%d\n",fakePid, shmPtr->time.seconds,shmPtr->time.nanoseconds);
+							fprintf(fp,"Master terminating P%d at %d:%d\n",fakePid, ptr->time.seconds,ptr->time.nanoseconds);
 							nonTerminated[fakePid] = -1;
 
 							release(fakePid,0);
 						}
 
-						if(shmPtr->resources.releaseF == 1)//strcmp(message.mtext, "Release") == 0 )
+						if(ptr->resources.releaseF == 1)//strcmp(message.mtext, "Release") == 0 )
 						{
-							shmPtr->resources.releaseF = 0;
+							ptr->resources.releaseF = 0;
 							release(fakePid,0);
 						}
 
@@ -287,7 +287,7 @@ int main(int argc, char* argv[]) {
 								}
 							}
 
-							if(w > 0 )//&& shmPtr->time.seconds == deadLockCheck.seconds)
+							if(w > 0 )//&& ptr->time.seconds == deadLockCheck.seconds)
 							{
 								deadLockCheck.seconds++;
                                                                 checkDeadLockDetection();
@@ -357,13 +357,13 @@ void release(int fakePid, int dl)
 
 	for(i=0; i < 20; i++) 
 	{
-		if(shmPtr->resourceDescriptor[fakePid].allocated[i] > 0)
+		if(ptr->resourceDescriptor[fakePid].allocated[i] > 0)
 		{		
 			validationArray[i] = i;
-			fprintf(fp,"R%d:%d ",i, shmPtr->resourceDescriptor[fakePid].allocated[i]);	
+			fprintf(fp,"R%d:%d ",i, ptr->resourceDescriptor[fakePid].allocated[i]);	
 			j++;
 		} 
-		else if(shmPtr->resourceDescriptor[fakePid].allocated[i] == 0)
+		else if(ptr->resourceDescriptor[fakePid].allocated[i] == 0)
 		{
 			returnResult++;
 		}
@@ -382,12 +382,12 @@ void release(int fakePid, int dl)
 		{
 			if(i == shareable[0] || i == shareable[1] || i == shareable[2] || i == shareable[3])
 			{
-				shmPtr->resourceDescriptor[fakePid].allocated[i] = 0;
+				ptr->resourceDescriptor[fakePid].allocated[i] = 0;
 			} 
 			else 
 			{
-				shmPtr->resources.available[i] += shmPtr->resourceDescriptor[fakePid].allocated[i];
-				shmPtr->resourceDescriptor[fakePid].allocated[i] = 0;			
+				ptr->resources.available[i] += ptr->resourceDescriptor[fakePid].allocated[i];
+				ptr->resourceDescriptor[fakePid].allocated[i] = 0;			
 			}
 		}
 	}
@@ -397,7 +397,7 @@ void checkDeadLockDetection()
 {
 	//timesDeadlockRun++;
 	fprintf(fp,"\nCurrent system resources\n");
-	fprintf(fp,"Master running deadlock detection at time %d:%d\n", shmPtr->time.seconds,shmPtr->time.nanoseconds);
+	fprintf(fp,"Master running deadlock detection at time %d:%d\n", ptr->time.seconds,ptr->time.nanoseconds);
 	int i = 0;
 	int manyBlock = 0;	
 	int average = 0;
@@ -419,7 +419,7 @@ void checkDeadLockDetection()
 	
 	for(i =0; i < manyBlock; i++)
 	{	
-		if(shmPtr->resources.available[resultArray[i]] <= shmPtr->resourceDescriptor[queueArray[i]].request[resultArray[i]] )
+		if(ptr->resources.available[resultArray[i]] <= ptr->resourceDescriptor[queueArray[i]].request[resultArray[i]] )
 		{
 			fprintf(fp,"	Killing process P%d\n", queueArray[i]);
 			fprintf(fp,"		");
@@ -442,7 +442,7 @@ void checkDeadLockDetection()
 		else 
 		{
 			addRequestToAllocated(queueArray[i], resultArray[i]);
-			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",queueArray[i], resultArray[i], shmPtr->time.seconds,shmPtr->time.nanoseconds);
+			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",queueArray[i], resultArray[i], ptr->time.seconds,ptr->time.nanoseconds);
 
 		}
 	}	
@@ -452,7 +452,7 @@ void checkDeadLockDetection()
 
 int ifBlockResources(int fakePid, int result) 
 {
-	if(shmPtr->resources.available[result] > 0)//= shmPtr->resourceDescriptor[fakePid].request[result] )
+	if(ptr->resources.available[result] > 0)//= ptr->resourceDescriptor[fakePid].request[result] )
 	{
 		return 1;
 	} 
@@ -467,13 +467,13 @@ void addRequestToAllocated(int fakePid, int results)
 {
 	if(results == shareable[0] || results == shareable[1] || results == shareable[2] || results == shareable[3])
 	{
-		shmPtr->resources.available[results] = shmPtr->resources.max[results];
+		ptr->resources.available[results] = ptr->resources.max[results];
 	} 
 	else 
 	{
-		shmPtr->resources.available[results] = shmPtr->resources.available[results] - shmPtr->resourceDescriptor[fakePid].request[results];
+		ptr->resources.available[results] = ptr->resources.available[results] - ptr->resourceDescriptor[fakePid].request[results];
 	}
-	shmPtr->resourceDescriptor[fakePid].allocated[results] = shmPtr->resourceDescriptor[fakePid].request[results];
+	ptr->resourceDescriptor[fakePid].allocated[results] = ptr->resourceDescriptor[fakePid].request[results];
 }
 
 
