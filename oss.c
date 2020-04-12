@@ -33,7 +33,8 @@ void detach();
 void sigErrors();
 void addClock(struct time* time, int sec, int ns);
 void rundeadlock();
-void checkTermination();
+
+int blockPtr = 0;
 
 char outputFileName[] = "log";
 FILE* fp;
@@ -92,7 +93,6 @@ int main(int argc, char* argv[]) {
  	time_t t;
 	srand((unsigned) time(&t));
 	int totalCount = 0;
-	int blockPtr = 0;
 
 	int i = 0;
 	for(i=0; i <20; i++)
@@ -152,7 +152,38 @@ int main(int argc, char* argv[]) {
 			
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{			
-						checkTermination();
+						 int l;
+        					for(l=0; l<18;l++){
+                					if(stillActive[l] == -1){
+                        					termed++;
+                					}
+        					}
+
+        					if(termed == 18){
+                					detach();
+                					return 0;
+
+                					} else {
+                        					termed = 0;
+                					}
+
+        					if(stillActive[pidNum] != -1){
+                					pid = stillActive[pidNum];
+                				} else {
+
+                				int s = pidNum;
+                				for(s=pidNum; s<18;s++){
+                				if(stillActive[s] == -1){
+                        				pidNum++;
+                				} else {
+                				break;
+                				}
+
+                				}
+
+                				pid = stillActive[pidNum];
+
+                				}
 	
 						cpid=fork();
 
@@ -226,42 +257,6 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void checkTermination()
-{
-	int l;	
-	for(l=0; l<18;l++){
-		if(stillActive[l] == -1){
-			termed++;					
-		} 
-	}
-						
-	if(termed == 18){					
-		detach();
- 		return 0;
-
-		} else {
-			termed = 0;
-		}
-
-	if(stillActive[pidNum] != -1){
-		pid = stillActive[pidNum];
-		} else {	
-							
-		int s = pidNum;
-		for(s=pidNum; s<18;s++){
-		if(stillActive[s] == -1){
-			pidNum++;
-		} else {
-		break;
-		}
-
-		}
-							
-		pid = stillActive[pidNum];
-
-		}	
-}
-
 void rundeadlock()
 {
 	if(pidNum < 17)
@@ -281,7 +276,6 @@ void rundeadlock()
 		}
 		if(w > 0 )
 		{
-			deadLockCheck.seconds++;
                         deadlockAlgo();
 		}
 
