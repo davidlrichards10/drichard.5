@@ -34,16 +34,18 @@ void sigErrors();
 void addClock(struct time* time, int sec, int ns);
 void rundeadlock();
 
+int timer = 10;
 int blockPtr = 0;
+int granted = 0;
 
 char outputFileName[] = "log";
 FILE* fp;
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) 
+{
 	int c;
-	int maxPro;
 	int v = 1;
-	int timer = 10;
+
 	while((c=getopt(argc, argv, "v:i:t:h"))!= EOF)
 	{
 		switch(c)
@@ -74,10 +76,9 @@ int main(int argc, char* argv[]) {
 	int verbose = v;
 	fp = fopen(outputFileName, "w");
 	
-	maxPro = 100;
+	int maxPro = 100;
 	srand(time(NULL));
-	int count = 0;
-	
+	int count = 0;	
 
 	if ((shmid = shmget(9784, sizeof(SharedMemory), IPC_CREAT | 0600)) < 0) {
         	perror("Error: shmget");
@@ -97,21 +98,21 @@ int main(int argc, char* argv[]) {
 	int i = 0;
 	for(i=0; i <20; i++)
 	{
-		ptr->resources.max[i] = rand() % (10 + 1 - 1) + 1;
+		ptr->resourceStruct.max[i] = rand() % (10 + 1 - 1) + 1;
 	}
 	for(i=0; i < 4; i++){
 		sharedResources[i] = rand() % (19 + 0 - 0) + 0;
 	}
 	for(i=0; i <20; i++)
 	{
-		ptr->resources.available[i] = ptr->resources.max[i];
+		ptr->resourceStruct.available[i] = ptr->resourceStruct.max[i];
 	}
 	int j = 0;
 	for(j=0; j < 18; j++) 
 	{
 		for(i = 0; i < 20; i++) 
 		{	
-			ptr->resourceDescriptor[j].allocated[i] = 0;
+			ptr->descriptor[j].allocated[i] = 0;
 		}
 
 	}
@@ -199,11 +200,11 @@ int main(int argc, char* argv[]) {
 			
 						}
 
-						if(ptr->resources.requestF == 1)
+						if(ptr->resourceStruct.requestF == 1)
 						{
-							ptr->resources.requestF = 0;
+							ptr->resourceStruct.requestF = 0;
 							int resourceIndex = rand() % (19 + 0 - 0) + 0;
-							ptr->resourceDescriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
+							ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
 							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
 							
 							int resultBlocked = checkBlocked(pid,resourceIndex);
@@ -227,26 +228,48 @@ int main(int argc, char* argv[]) {
 								}
 								blockPtr++;					
 
-							} else {
+							} 
+							else 
+							{
 								allocated(pid, resourceIndex);
 
-									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
-								
-						}	
+								fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+								granted++;
+								if( granted == 20 )
+								{
+									fprintf(fp,"\n\nCurrent Resource Table\n");
+									granted = 0;
+									int p = 0;
+        								int j;
+        								int i;
+        								for(j =0; j <18; j++){
+                								p = j;
+
+                        								fprintf(fp,"P%d  ",p);
+                								for(i = 0; i < 20; i++) {
+                                							fprintf(fp,"%d ", ptr->descriptor[p].allocated[i]);
+
+                        							}
+                        							fprintf(fp,"\n");
+        								
+									}
+									fprintf(fp,"\n");	
+								}	
+							}
 						}
 
-						if(ptr->resources.termF == 1)
+						if(ptr->resourceStruct.termF == 1)
 						{
-							ptr->resources.termF = 0;
+							ptr->resourceStruct.termF = 0;
 							fprintf(fp,"Master terminating P%d at %d:%d\n",pid, ptr->time.seconds,ptr->time.nanoseconds);
 							stillActive[pid] = -1;
 
 							release(pid,0);
 						}
 
-						if(ptr->resources.releaseF == 1)
+						if(ptr->resourceStruct.releaseF == 1)
 						{
-							ptr->resources.releaseF = 0;
+							ptr->resourceStruct.releaseF = 0;
 							release(pid,0);
 						}
 
@@ -303,7 +326,7 @@ void addClock(struct time* time, int sec, int ns){
 void detach()
 {
 	//sem_unlink("clocksem");
-	msgctl(messageQueueId,IPC_RMID,NULL);
+	//msgctl(messageQueueId,IPC_RMID,NULL);
 	shmctl(shmid, IPC_RMID, NULL);	
 }
 
@@ -316,7 +339,7 @@ void sigErrors(int signum)
         }
         else
         {
-                printf("\nInterupted by 3 second alarm\n");
+                printf("\nInterupted by %d second alarm\n", timer);
         }
 	
 	detach();
@@ -337,13 +360,13 @@ void release(int pid, int dl)
 
 	for(i=0; i < 20; i++) 
 	{
-		if(ptr->resourceDescriptor[pid].allocated[i] > 0)
+		if(ptr->descriptor[pid].allocated[i] > 0)
 		{		
 			validationArray[i] = i;
-			fprintf(fp,"R%d:%d ",i, ptr->resourceDescriptor[pid].allocated[i]);	
+			fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);	
 			j++;
 		} 
-		else if(ptr->resourceDescriptor[pid].allocated[i] == 0)
+		else if(ptr->descriptor[pid].allocated[i] == 0)
 		{
 			numberRes++;
 		}
@@ -362,12 +385,12 @@ void release(int pid, int dl)
 		{
 			if(i == sharedResources[0] || i == sharedResources[1] || i == sharedResources[2] || i == sharedResources[3])
 			{
-				ptr->resourceDescriptor[pid].allocated[i] = 0;
+				ptr->descriptor[pid].allocated[i] = 0;
 			} 
 			else 
 			{
-				ptr->resources.available[i] += ptr->resourceDescriptor[pid].allocated[i];
-				ptr->resourceDescriptor[pid].allocated[i] = 0;			
+				ptr->resourceStruct.available[i] += ptr->descriptor[pid].allocated[i];
+				ptr->descriptor[pid].allocated[i] = 0;			
 			}
 		}
 	}
@@ -398,7 +421,7 @@ void deadlockAlgo()
 	
 	for(i =0; i < blockCount; i++)
 	{	
-		if(ptr->resources.available[resourceIndexQueue[i]] <= ptr->resourceDescriptor[blockedQueue[i]].request[resourceIndexQueue[i]] )
+		if(ptr->resourceStruct.available[resourceIndexQueue[i]] <= ptr->descriptor[blockedQueue[i]].request[resourceIndexQueue[i]] )
 		{
 			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
@@ -430,7 +453,7 @@ void deadlockAlgo()
 
 int checkBlocked(int pid, int resourceIndex) 
 {
-	if(ptr->resources.available[resourceIndex] > 0)
+	if(ptr->resourceStruct.available[resourceIndex] > 0)
 	{
 		return 1;
 	} 
@@ -445,13 +468,13 @@ void allocated(int pid, int resourceIndex)
 {
 	if(resourceIndex == sharedResources[0] || resourceIndex == sharedResources[1] || resourceIndex == sharedResources[2] || resourceIndex == sharedResources[3])
 	{
-		ptr->resources.available[resourceIndex] = ptr->resources.max[resourceIndex];
+		ptr->resourceStruct.available[resourceIndex] = ptr->resourceStruct.max[resourceIndex];
 	} 
 	else 
 	{
-		ptr->resources.available[resourceIndex] = ptr->resources.available[resourceIndex] - ptr->resourceDescriptor[pid].request[resourceIndex];
+		ptr->resourceStruct.available[resourceIndex] = ptr->resourceStruct.available[resourceIndex] - ptr->descriptor[pid].request[resourceIndex];
 	}
-	ptr->resourceDescriptor[pid].allocated[resourceIndex] = ptr->resourceDescriptor[pid].request[resourceIndex];
+	ptr->descriptor[pid].allocated[resourceIndex] = ptr->descriptor[pid].request[resourceIndex];
 }
 
 

@@ -18,85 +18,37 @@ int shmid;
 int child_id;
 int chance[100];
 int chancePos =0;
-SharedMemory* shmPtr;
+SharedMemory* ptr;
 void addClock(struct time* time, int sec, int ns);
 
-typedef struct message {
-    long myType;
-    char mtext[512];
-} Message;
-
-static int messageQueueId;
-int terminate = 0;
-
 int main(int argc, char* argv[]) {
-
-	/*int termination = (rand() % (250 * 1000000) + 1);
-	struct time nextTerminationCheck;
-        nextTerminationCheck.seconds = shmPtr->time.seconds;
-        nextTerminationCheck.nanoseconds = shmPtr->time.nanoseconds;
-        addClock(&nextTerminationCheck, 0, termination);
-*/
-	Message message;	
 
      	if ((shmid = shmget(9784, sizeof(SharedMemory), 0600)) < 0) {
             perror("Error: shmget");
             exit(errno);
      	}
    
-    	/* if ((messageQueueId = msgget(3000, 0644)) == -1) {
-            perror("Error: msgget");
-            exit(errno);
-      	}*/
-
-
- 	 
-	shmPtr = shmat(shmid, NULL, 0);
+	ptr = shmat(shmid, NULL, 0);
 
 	srand(getpid());
 
-	while(1) {
+	while(1) 
+	{
 	
-		/*if (msgrcv(messageQueueId, &message,sizeof(message)+1,1,0) == -1) {
-			perror("msgrcv");
-		}*/
-
 		int chance = rand() % (100 + 1 - 1) + 1;
 		int chance1 = rand() % (100 + 1 - 1) + 1;
 
 		if(chance > 0 && chance < 63) {
-			shmPtr->resources.requestF = 1;
-			//strcpy(message.mtext,"Request");
+			ptr->resourceStruct.requestF = 1;
 
-
-		} else {//if(chance > 62 && chance < 93) {
-			shmPtr->resources.releaseF = 1;
-			//strcpy(message.mtext,"Release");
+		} else {
+			ptr->resourceStruct.releaseF = 1;
 
 		}
-		//if(shmPtr->time.seconds > 0)//nextTerminationCheck.seconds)
-		//{
-			/*termination = (rand() % (250 * 1000000) + 1);
-			nextTerminationCheck.seconds = shmPtr->time.seconds;
-			nextTerminationCheck.nanoseconds = shmPtr->time.nanoseconds;
-			addClock(&nextTerminationCheck, 0, termination);
- */
 			if(chance1 < 10) 
 			{	
-				shmPtr->resources.termF = 1;
-				//strcpy(message.mtext,"Terminated");
-				terminate = 1;
-				//shmPtr->resources.termF = 1;
+				ptr->resourceStruct.termF = 1;
 			}
-		//}
-	
-		/*message.myType = 2;	
-			
-		if(msgsnd(messageQueueId, &message,sizeof(message)+1,0) == -1) {
-			perror("msgsnd");
-			exit(1);
-		} */
-
 		exit(0);
 	
 
