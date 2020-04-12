@@ -17,7 +17,11 @@
 int shmid; 
 SharedMemory* ptr;
 
-int max = 0;
+int requestGranted = 0;
+int deadlockTermination = 0;
+int normalTermination = 0;
+int numDeadlockRan = 0;
+
 int sharedResources[4];
 int blockedQueue[20];
 int resourceIndexQueue[20];
@@ -33,11 +37,13 @@ void detach();
 void sigErrors();
 void addClock(struct time* time, int sec, int ns);
 void rundeadlock();
+void printStats();
 
 int timer = 10;
 int blockPtr = 0;
 int granted = 0;
 int verbose = 0;
+int lineCounter = 0;
 
 char outputFileName[] = "log";
 FILE* fp;
@@ -168,8 +174,10 @@ int main(int argc, char* argv[])
         					}
 
         					if(termed == 18){
-                					detach();
-                					return 0;
+                					
+							detach();
+                					printStats();
+							return 0;
 
                 					} else {
                         					termed = 0;
@@ -212,16 +220,18 @@ int main(int argc, char* argv[])
 							ptr->resourceStruct.requestF = 0;
 							int resourceIndex = rand() % (19 + 0 - 0) + 0;
 							ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
-							if(verbose == 1)
+							if(verbose == 1 && lineCounter < 10000)
 							{
 								fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+								lineCounter++;
 							}
 							int resultBlocked = checkBlocked(pid,resourceIndex);
 
 							if(resultBlocked == 0){
-								if(verbose == 1)
+								if(verbose == 1 && lineCounter < 10000)
 								{
 									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+									lineCounter++;
 								}
 								int f, duplicate = 0;
 								for(f=0; f< 18; f++){
@@ -242,12 +252,14 @@ int main(int argc, char* argv[])
 							else 
 							{
 								allocated(pid, resourceIndex);
-								if(verbose == 1)
+								if(verbose == 1 && lineCounter < 10000)
 								{
 									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+									lineCounter++;
 								}
+								requestGranted++;
 								granted++;
-								if( granted == 20  && verbose == 1)
+								if( granted == 20  && verbose == 1 && lineCounter < 10000)
 								{
 									fprintf(fp,"\n\nCurrent Resource Table\n");
 									granted = 0;
@@ -268,6 +280,7 @@ int main(int argc, char* argv[])
         								}
 									}
 									fprintf(fp,"\n");	
+									lineCounter+=18;
 								}	
 							}
 						}
@@ -275,10 +288,12 @@ int main(int argc, char* argv[])
 						if(ptr->resourceStruct.termF == 1)
 						{
 							ptr->resourceStruct.termF = 0;
-							if(verbose == 1)
+							if(verbose == 1 && lineCounter < 10000)
 							{
 								fprintf(fp,"Master terminating P%d at %d:%d\n",pid, ptr->time.seconds,ptr->time.nanoseconds);
+								lineCounter++;
 							}
+							normalTermination++;
 							stillActive[pid] = -1;
 
 							release(pid,0);
@@ -289,14 +304,28 @@ int main(int argc, char* argv[])
 							ptr->resourceStruct.releaseF = 0;
 							release(pid,0);
 						}
-						if(verbose == 1 || verbose == 0)
+						if((verbose == 1 || verbose == 0) && lineCounter < 10000)
 						{
 							rundeadlock();
+							lineCounter+=20;
 						}
 			}
 		}
 	detach();
 	return 0;
+}
+
+void printStats()
+{
+	fprintf(fp,"\nTotal Number of request granted = %d\n", requestGranted);
+	fprintf(fp,"Total processes terminated in deadlock algo = %d\n", deadlockTermination);	
+	fprintf(fp,"Total processes terminated normally = %d\n", normalTermination);
+	fprintf(fp,"Total times deadlock algo ran = %d\n", numDeadlockRan);
+
+	printf("\nTotal Number of request granted = %d\n", requestGranted);
+        printf("Total processes terminated in deadlock algo = %d\n", deadlockTermination);
+        printf("Total processes terminated normally = %d\n", normalTermination);
+        printf("Total times deadlock algo ran = %d\n", numDeadlockRan);
 }
 
 void rundeadlock()
@@ -319,6 +348,7 @@ void rundeadlock()
 		if(w > 0 )
 		{
                         deadlockAlgo();
+			numDeadlockRan++;
 		}
 
 		pidNum = 0;		
@@ -452,6 +482,7 @@ void deadlockAlgo()
 		{
 			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
+			deadlockTermination++;
 			release(blockedQueue[i],1);		
 			
 			if(i+1 < blockCount)

@@ -1,3 +1,99 @@
+commit 91ed1901b4d002f6e6c4c3db4508e98b6954e85f
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sun Apr 12 11:15:51 2020 -0500
+
+    added verbose option
+
+commit 0df086c48860374068f65c8b0ef9fda291e6789d
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sun Apr 12 10:49:53 2020 -0500
+
+    printing resource table working
+
+commit 84645775651e7643b67e0c13ab1e870b99be72fc
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sun Apr 12 00:13:08 2020 -0500
+
+    checking fro termination correctly
+
+commit 2fe49358e55d269f4f10a40f0c191adac87a84a4
+Author: davidlrichards10 <62032455+davidlrichards10@users.noreply.github.com>
+Date:   Sat Apr 11 23:52:59 2020 -0500
+
+    Update oss.c
+
+commit 8c36e6cc22e2c291edc8fc63768a7003ebeaf5f9
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sat Apr 11 22:59:04 2020 -0500
+
+    blocked queue working properly
+
+commit faf7f530cf50e23b44e9295a011390f207fe278f
+Author: davidlrichards10 <62032455+davidlrichards10@users.noreply.github.com>
+Date:   Sat Apr 11 22:56:03 2020 -0500
+
+    Update oss.c
+
+commit 312310fa0cd688e71c61dc5b761b779232a224de
+Author: davidlrichards10 <62032455+davidlrichards10@users.noreply.github.com>
+Date:   Sat Apr 11 22:44:50 2020 -0500
+
+    Update oss.c
+
+commit 0bf6545e41e5cd1de1ab65611a7566161d13c06c
+Author: davidlrichards10 <62032455+davidlrichards10@users.noreply.github.com>
+Date:   Sat Apr 11 22:18:43 2020 -0500
+
+    Update oss.c
+
+commit 100f3f396fa47f3634fb355ea1f34db03070bca1
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sat Apr 11 17:29:33 2020 -0500
+
+    fixed deadlock accuracy
+
+commit a549cdecfaa41b7be5815d5f3cb066ffe6bb8e07
+Author: davidlrichards10 <62032455+davidlrichards10@users.noreply.github.com>
+Date:   Sat Apr 11 17:03:13 2020 -0500
+
+    Update oss.c
+
+commit 0c27f1ab0219c975971257876be64bdf277ae8ab
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Sat Apr 11 16:32:09 2020 -0500
+
+    fixed termination check
+
+commit 107eb4f12d8042f29b7d1ccc9f838828cc45ca6a
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Fri Apr 10 21:51:53 2020 -0500
+
+    return false if no deadlock
+
+commit c8996b3699a33e69478f5bf437b0a19ff3833814
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Fri Apr 10 15:23:51 2020 -0500
+
+    changed clock to fork at random times and check checklock every second
+
+commit 595f6730e1d59756bbced199d0ff6654185641d1
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Thu Apr 9 17:39:10 2020 -0500
+
+    spawned 18 processes max
+
+commit 44ee0d35174ed79041b8cdb0388e9ff8a9562184
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Thu Apr 9 17:29:10 2020 -0500
+
+    set up resource descriptors/shared memory arrays
+
+commit 89781673f1d82baf2f99a81a04e1cf7febb03ee9
+Author: David Richards <drichard@hoare7.cs.umsl.edu>
+Date:   Thu Apr 9 13:41:35 2020 -0500
+
+    creating functions to release and check deadlock
+
 commit e644fe1dec869aef8c2fd597c0605481d18f0dc6
 Author: David Richards <drichard@hoare7.cs.umsl.edu>
 Date:   Thu Apr 9 13:31:42 2020 -0500
