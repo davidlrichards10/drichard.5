@@ -17,6 +17,7 @@
 int shmid; 
 SharedMemory* ptr;
 
+int max = 0;
 int sharedResources[4];
 int blockedQueue[20];
 int resourceIndexQueue[20];
