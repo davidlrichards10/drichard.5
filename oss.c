@@ -37,6 +37,7 @@ void rundeadlock();
 int timer = 10;
 int blockPtr = 0;
 int granted = 0;
+int verbose = 0;
 
 char outputFileName[] = "log";
 FILE* fp;
@@ -44,8 +45,6 @@ FILE* fp;
 int main(int argc, char* argv[]) 
 {
 	int c;
-	int v = 1;
-
 	while((c=getopt(argc, argv, "v:i:t:h"))!= EOF)
 	{
 		switch(c)
@@ -60,7 +59,7 @@ int main(int argc, char* argv[])
 				exit(0);
 				break;
 			case 'v':
-				v = atoi(optarg);
+				verbose = 1;
 				break;
 			case 'i':
                 		strcpy(outputFileName, optarg);
@@ -73,7 +72,15 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	int verbose = v;
+	if (verbose == 1)
+	{
+		printf("Verbose ON\n");
+	}
+	else
+	{
+		printf("Verbose OFF\n");
+	}
+
 	fp = fopen(outputFileName, "w");
 	
 	int maxPro = 100;
@@ -205,14 +212,17 @@ int main(int argc, char* argv[])
 							ptr->resourceStruct.requestF = 0;
 							int resourceIndex = rand() % (19 + 0 - 0) + 0;
 							ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
-							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
-							
+							if(verbose == 1)
+							{
+								fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+							}
 							int resultBlocked = checkBlocked(pid,resourceIndex);
 
 							if(resultBlocked == 0){
-
+								if(verbose == 1)
+								{
 									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
-								
+								}
 								int f, duplicate = 0;
 								for(f=0; f< 18; f++){
 									if(blockedQueue[f] == pid){
@@ -232,26 +242,30 @@ int main(int argc, char* argv[])
 							else 
 							{
 								allocated(pid, resourceIndex);
-
-								fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+								if(verbose == 1)
+								{
+									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+								}
 								granted++;
-								if( granted == 20 )
+								if( granted == 20  && verbose == 1)
 								{
 									fprintf(fp,"\n\nCurrent Resource Table\n");
 									granted = 0;
 									int p = 0;
         								int j;
         								int i;
-        								for(j =0; j <18; j++){
-                								p = j;
-
+        								for(j =0; j <18; j++)
+									{
+										if(stillActive[j] != -1)
+										{
+                									p = j;
                         								fprintf(fp,"P%d  ",p);
                 								for(i = 0; i < 20; i++) {
                                 							fprintf(fp,"%d ", ptr->descriptor[p].allocated[i]);
 
                         							}
                         							fprintf(fp,"\n");
-        								
+        								}
 									}
 									fprintf(fp,"\n");	
 								}	
@@ -261,7 +275,10 @@ int main(int argc, char* argv[])
 						if(ptr->resourceStruct.termF == 1)
 						{
 							ptr->resourceStruct.termF = 0;
-							fprintf(fp,"Master terminating P%d at %d:%d\n",pid, ptr->time.seconds,ptr->time.nanoseconds);
+							if(verbose == 1)
+							{
+								fprintf(fp,"Master terminating P%d at %d:%d\n",pid, ptr->time.seconds,ptr->time.nanoseconds);
+							}
 							stillActive[pid] = -1;
 
 							release(pid,0);
@@ -272,8 +289,10 @@ int main(int argc, char* argv[])
 							ptr->resourceStruct.releaseF = 0;
 							release(pid,0);
 						}
-
-						rundeadlock();
+						if(verbose == 1 || verbose == 0)
+						{
+							rundeadlock();
+						}
 			}
 		}
 	detach();
@@ -356,14 +375,19 @@ void release(int pid, int dl)
 	{
 		validationArray[i] = 0;	
 	}
-		fprintf(fp,"Master releasing P%d, Resources are: ",pid);
-
+		if(verbose == 1)
+		{
+			fprintf(fp,"Master releasing P%d, Resources are: ",pid);
+		}
 	for(i=0; i < 20; i++) 
 	{
 		if(ptr->descriptor[pid].allocated[i] > 0)
 		{		
 			validationArray[i] = i;
-			fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);	
+			if(verbose == 1)
+			{
+				fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);	
+			}
 			j++;
 		} 
 		else if(ptr->descriptor[pid].allocated[i] == 0)
@@ -372,13 +396,16 @@ void release(int pid, int dl)
 		}
 	}
 	
-	if(numberRes == 20)
+	if(numberRes == 20 && verbose == 1)
 	{
 		fprintf(fp,"None\n");
 	} 
 	else 
 	{
-		fprintf(fp,"\n");
+		if(verbose == 1)
+		{
+			fprintf(fp,"\n");
+		}
 		int i;
 
 		for(i=0; i < 20; i++) 
@@ -449,6 +476,7 @@ void deadlockAlgo()
 	}	
 	fprintf(fp,"System is no longer in deadlock\n");
 	fprintf(fp,"\n");
+	
 }
 
 int checkBlocked(int pid, int resourceIndex) 
