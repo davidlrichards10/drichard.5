@@ -22,20 +22,17 @@ typedef struct message {
 int shmid; 
 SharedMemory* ptr;
 
-int shareable[4];
-int queueArray[20];
-int resultArray[20];
+int sharedResources[4];
+int blockedQueue[20];
+int resourceIndexQueue[20];
 static int messageQueueId;
-int times;
-int availableActive = 0;
-int nonTerminated[20];
-int num = 0;
-int terminatedNumber = 0;	
-void userProcess();
-int ifBlockResources(int fakePid, int result);
-void release(int fakePid, int dl);
+int stillActive[20];
+int pidNum = 0;
+int termed = 0;	
+int checkBlocked(int pid, int result);
+void release(int pid, int dl);
 void checkDeadLockDetection();
-void addRequestToAllocated(int fakePid, int results);
+void allocated(int pid, int resourceIndex);
 void detach();
 void sigErrors();
 void addClock(struct time* time, int sec, int ns);
@@ -45,8 +42,7 @@ FILE* fp;
 
 int main(int argc, char* argv[]) {
 	int c;
-	int requestNumbers = 0;
-	int maxChildProcess;
+	int maxPro;
 	int v = 1;
 	int timer = 10;
 	while((c=getopt(argc, argv, "v:i:t:h"))!= EOF)
@@ -78,7 +74,7 @@ int main(int argc, char* argv[]) {
 	int verbose = v;
 	fp = fopen(outputFileName, "w");
 	
-	maxChildProcess = 100;
+	maxPro = 100;
 	int bufSize = 200;
 	char errorMessage[bufSize];
 	Message message;
@@ -94,14 +90,14 @@ int main(int argc, char* argv[]) {
   
 	ptr = shmat(shmid, NULL, 0);
 
-	pid_t childpid;
+	pid_t cpid;
 
-	int fakePid = 0;
+	int pid = 0;
 
  	time_t t;
 	srand((unsigned) time(&t));
 	int totalCount = 0;
-	int blockPos = 0;
+	int blockPtr = 0;
 
 	int i = 0;
 	for(i=0; i <20; i++)
@@ -109,7 +105,7 @@ int main(int argc, char* argv[]) {
 		ptr->resources.max[i] = rand() % (10 + 1 - 1) + 1;
 	}
 	for(i=0; i < 4; i++){
-		shareable[i] = rand() % (19 + 0 - 0) + 0;
+		sharedResources[i] = rand() % (19 + 0 - 0) + 0;
 	}
 	for(i=0; i <20; i++)
 	{
@@ -126,11 +122,11 @@ int main(int argc, char* argv[]) {
 	}
 	for(i = 0; i <20; i++)
 	{
-		queueArray[i] = -1;
+		blockedQueue[i] = -1;
 	}		
 	for(i = 0; i < 18; i++)
 	{
-		nonTerminated[i] = i;
+		stillActive[i] = i;
 	}
 
 	/* Catch ctrl-c and 3 second alarm interupts */
@@ -149,9 +145,9 @@ int main(int argc, char* argv[]) {
 	deadLockCheck.seconds = 1;
 	
 	alarm(timer);
-	while(totalCount < maxChildProcess || ptr_count > 0){ 							
+	while(totalCount < maxPro || ptr_count > 0){ 							
 		
-			if(waitpid(childpid,NULL, WNOHANG)> 0){
+			if(waitpid(cpid,NULL, WNOHANG)> 0){
 				ptr_count--;
 			}
 
@@ -163,26 +159,26 @@ int main(int argc, char* argv[]) {
 			{			
 						int l;	
 						for(l=0; l<18;l++){
-							if(nonTerminated[l] == -1){
-								terminatedNumber++;					
+							if(stillActive[l] == -1){
+								termed++;					
 							} 
 						}
 						
-						if(terminatedNumber == 18){					
+						if(termed == 18){					
 							detach();
  							return 0;
 
 						} else {
-							terminatedNumber = 0;
+							termed = 0;
 						}
 
-						if(nonTerminated[num] != -1){
-							fakePid = nonTerminated[num];
+						if(stillActive[num] != -1){
+							pid = stillActive[num];
 						} else {	
 							
 							int s = num;
 							for(s=num; s<18;s++){
-								if(nonTerminated[s] == -1){
+								if(stillActive[s] == -1){
 									num++;
 								} else {
 									break;
@@ -190,18 +186,18 @@ int main(int argc, char* argv[]) {
 
 							}
 							
-							fakePid = nonTerminated[num];
+							pid = stillActive[num];
 
 						}
 	
-						childpid=fork();
+						cpid=fork();
 
 						totalCount++;
 						ptr_count++;
 		
-						if(childpid < 0) {
+						if(cpid < 0) {
 							perror("Fork failed");
-						} else if(childpid == 0) {		
+						} else if(cpid == 0) {		
 							execl("./user", "user",NULL);
 							snprintf(errorMessage, sizeof(errorMessage), "%s: Error: ", argv[0]);
 	    	 					perror(errorMessage);		
@@ -218,40 +214,36 @@ int main(int argc, char* argv[]) {
 						if(ptr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
 						{
 							ptr->resources.requestF = 0;
-							int results = rand() % (19 + 0 - 0) + 0;
-							ptr->resourceDescriptor[fakePid].request[results] = rand() % (10 + 1 - 1) + 1;
-							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",fakePid, results, ptr->time.seconds,ptr->time.nanoseconds);
+							int resourceIndex = rand() % (19 + 0 - 0) + 0;
+							ptr->resourceDescriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
+							fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
 							
-							int resultBlocked = ifBlockResources(fakePid,results);
+							int resultBlocked = checkBlocked(pid,resourceIndex);
 
 							if(resultBlocked == 0){
 
-									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",fakePid, results, ptr->time.seconds,ptr->time.nanoseconds);
+									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
 								
 								int f, duplicate = 0;
 								for(f=0; f< 18; f++){
-									if(queueArray[f] == fakePid){
+									if(blockedQueue[f] == pid){
 										duplicate++;
 									}
 								}
 								
 								if(duplicate == 0){
-									queueArray[blockPos] = fakePid;
-									resultArray[blockPos] = results;
+									blockedQueue[blockPtr] = pid;
+									resourceIndexQueue[blockPtr] = resourceIndex;
 								} else {
 									duplicate = 0;
 								}
-								blockPos++;					
+								blockPtr++;					
 
 							} else {
-								addRequestToAllocated(fakePid, results);
+								allocated(pid, resourceIndex);
 
-									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",fakePid, results, ptr->time.seconds,ptr->time.nanoseconds);
-								if(requestNumbers == 20){
-									requestNumbers = 0;
-								requestNumbers++;
-								//trackRequest++;
-							}
+									fprintf(fp,"Master granting P%d  request R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+								
 						}	
 						}
 
@@ -259,21 +251,21 @@ int main(int argc, char* argv[]) {
 						{
 							ptr->resources.termF = 0;
 							//trackProcessTerminated++;
-							fprintf(fp,"Master terminating P%d at %d:%d\n",fakePid, ptr->time.seconds,ptr->time.nanoseconds);
-							nonTerminated[fakePid] = -1;
+							fprintf(fp,"Master terminating P%d at %d:%d\n",pid, ptr->time.seconds,ptr->time.nanoseconds);
+							stillActive[pid] = -1;
 
-							release(fakePid,0);
+							release(pid,0);
 						}
 
 						if(ptr->resources.releaseF == 1)//strcmp(message.mtext, "Release") == 0 )
 						{
 							ptr->resources.releaseF = 0;
-							release(fakePid,0);
+							release(pid,0);
 						}
 
-						if(num < 17)
+						if(pidNum < 17)
 						{			
-							num++;	
+							pidNum++;	
 						} 
 						else 
 						{
@@ -281,7 +273,7 @@ int main(int argc, char* argv[]) {
 							int k,w=0;
 							for(k =0; k < 20; k++)
 							{
-								if(queueArray[k] != -1)
+								if(blockedQueue[k] != -1)
 								{
 									w++;
 								}
@@ -293,14 +285,14 @@ int main(int argc, char* argv[]) {
                                                                 checkDeadLockDetection();
 							}
 
-							num = 0;		
+							pidNum = 0;		
 							
 							int i = 0;
 							for(i = 0; i <20; i++)
 							{
-								queueArray[i] = -1;
+								blockedQueue[i] = -1;
 							}		
-							blockPos = 0;
+							blockPtr = 0;
 						
 						}
 
@@ -343,7 +335,7 @@ void sigErrors(int signum)
         exit(0);
 }
 
-void release(int fakePid, int dl)
+void release(int pid, int dl)
 {
 	int i = 0, j = 0;
 	int validationArray[20];
@@ -353,17 +345,17 @@ void release(int fakePid, int dl)
 	{
 		validationArray[i] = 0;	
 	}
-		fprintf(fp,"Master releasing P%d, Resources are: ",fakePid);
+		fprintf(fp,"Master releasing P%d, Resources are: ",pid);
 
 	for(i=0; i < 20; i++) 
 	{
-		if(ptr->resourceDescriptor[fakePid].allocated[i] > 0)
+		if(ptr->resourceDescriptor[pid].allocated[i] > 0)
 		{		
 			validationArray[i] = i;
-			fprintf(fp,"R%d:%d ",i, ptr->resourceDescriptor[fakePid].allocated[i]);	
+			fprintf(fp,"R%d:%d ",i, ptr->resourceDescriptor[pid].allocated[i]);	
 			j++;
 		} 
-		else if(ptr->resourceDescriptor[fakePid].allocated[i] == 0)
+		else if(ptr->resourceDescriptor[pid].allocated[i] == 0)
 		{
 			returnResult++;
 		}
@@ -380,14 +372,14 @@ void release(int fakePid, int dl)
 
 		for(i=0; i < 20; i++) 
 		{
-			if(i == shareable[0] || i == shareable[1] || i == shareable[2] || i == shareable[3])
+			if(i == sharedResources[0] || i == sharedResources[1] || i == sharedResources[2] || i == sharedResources[3])
 			{
-				ptr->resourceDescriptor[fakePid].allocated[i] = 0;
+				ptr->resourceDescriptor[pid].allocated[i] = 0;
 			} 
 			else 
 			{
-				ptr->resources.available[i] += ptr->resourceDescriptor[fakePid].allocated[i];
-				ptr->resourceDescriptor[fakePid].allocated[i] = 0;			
+				ptr->resources.available[i] += ptr->resourceDescriptor[pid].allocated[i];
+				ptr->resourceDescriptor[pid].allocated[i] = 0;			
 			}
 		}
 	}
@@ -403,7 +395,7 @@ void checkDeadLockDetection()
 	int average = 0;
 	for(i =0; i < 20; i++)
 	{
-		if(queueArray[i] != -1)
+		if(blockedQueue[i] != -1)
 		{
 			manyBlock++;
 		}
@@ -411,7 +403,7 @@ void checkDeadLockDetection()
 	fprintf(fp,"	Process ");
 	for(i =0; i < manyBlock; i++)
 	{
-		fprintf(fp, "P%d, ", queueArray[i]);
+		fprintf(fp, "P%d, ", blockedQueue[i]);
 
 	}	
 	fprintf(fp,"deadlocked\n");
@@ -419,21 +411,21 @@ void checkDeadLockDetection()
 	
 	for(i =0; i < manyBlock; i++)
 	{	
-		if(ptr->resources.available[resultArray[i]] <= ptr->resourceDescriptor[queueArray[i]].request[resultArray[i]] )
+		if(ptr->resources.available[resourceIndexQueue[i]] <= ptr->resourceDescriptor[blockedQueue[i]].request[resourceIndexQueue[i]] )
 		{
-			fprintf(fp,"	Killing process P%d\n", queueArray[i]);
+			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
-			release(queueArray[i],1);		
+			release(blockedQueue[i],1);		
 			
 			if(i+1 < manyBlock)
 			{
-				fprintf(fp,"	Master running deadlock detection after P%d killed\n",queueArray[i]);
+				fprintf(fp,"	Master running deadlock detection after P%d killed\n",blockedQueue[i]);
 				fprintf(fp,"	Processes ");
 				//numTerminatedDeadLock++;
 				int m;
 				for(m=i+1; m <manyBlock; m++)
 				{
-					fprintf(fp,"P%d, ",queueArray[m]);	
+					fprintf(fp,"P%d, ",blockedQueue[m]);	
 				}
 				fprintf(fp,"deadlocked\n");
 			}
@@ -441,8 +433,8 @@ void checkDeadLockDetection()
 		} 
 		else 
 		{
-			addRequestToAllocated(queueArray[i], resultArray[i]);
-			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",queueArray[i], resultArray[i], ptr->time.seconds,ptr->time.nanoseconds);
+			allocated(blockedQueue[i], resourceIndexQueue[i]);
+			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",blockedQueue[i], resourceIndexQueue[i], ptr->time.seconds,ptr->time.nanoseconds);
 
 		}
 	}	
@@ -450,9 +442,9 @@ void checkDeadLockDetection()
 	fprintf(fp,"\n");
 }
 
-int ifBlockResources(int fakePid, int result) 
+int checkBlocked(int pid, int resourceIndex) 
 {
-	if(ptr->resources.available[result] > 0)//= ptr->resourceDescriptor[fakePid].request[result] )
+	if(ptr->resources.available[resourceIndex] > 0)//= ptr->resourceDescriptor[pid].request[resourceIndex] )
 	{
 		return 1;
 	} 
@@ -463,17 +455,17 @@ int ifBlockResources(int fakePid, int result)
 }
 
 
-void addRequestToAllocated(int fakePid, int results) 
+void allocated(int pid, int resourceIndex) 
 {
-	if(results == shareable[0] || results == shareable[1] || results == shareable[2] || results == shareable[3])
+	if(resourceIndex == sharedResources[0] || resourceIndex == sharedResources[1] || resourceIndex == sharedResources[2] || resourceIndex == sharedResources[3])
 	{
-		ptr->resources.available[results] = ptr->resources.max[results];
+		ptr->resources.available[resourceIndex] = ptr->resources.max[resourceIndex];
 	} 
 	else 
 	{
-		ptr->resources.available[results] = ptr->resources.available[results] - ptr->resourceDescriptor[fakePid].request[results];
+		ptr->resources.available[resourceIndex] = ptr->resources.available[resourceIndex] - ptr->resourceDescriptor[pid].request[resourceIndex];
 	}
-	ptr->resourceDescriptor[fakePid].allocated[results] = ptr->resourceDescriptor[fakePid].request[results];
+	ptr->resourceDescriptor[pid].allocated[resourceIndex] = ptr->resourceDescriptor[pid].request[resourceIndex];
 }
 
 
