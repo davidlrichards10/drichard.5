@@ -27,11 +27,13 @@ int pidNum = 0;
 int termed = 0;	
 int checkBlocked(int pid, int result);
 void release(int pid, int dl);
-void checkDeadLockDetection();
+void deadlockAlgo();
 void allocated(int pid, int resourceIndex);
 void detach();
 void sigErrors();
 void addClock(struct time* time, int sec, int ns);
+void rundeadlock();
+void checkTermination();
 
 char outputFileName[] = "log";
 FILE* fp;
@@ -150,38 +152,7 @@ int main(int argc, char* argv[]) {
 			
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{			
-						int l;	
-						for(l=0; l<18;l++){
-							if(stillActive[l] == -1){
-								termed++;					
-							} 
-						}
-						
-						if(termed == 18){					
-							detach();
- 							return 0;
-
-						} else {
-							termed = 0;
-						}
-
-						if(stillActive[pidNum] != -1){
-							pid = stillActive[pidNum];
-						} else {	
-							
-							int s = pidNum;
-							for(s=pidNum; s<18;s++){
-								if(stillActive[s] == -1){
-									pidNum++;
-								} else {
-									break;
-								}
-
-							}
-							
-							pid = stillActive[pidNum];
-
-						}
+						checkTermination();
 	
 						cpid=fork();
 
@@ -197,7 +168,7 @@ int main(int argc, char* argv[]) {
 			
 						}
 
-						if(ptr->resources.requestF == 1)//strcmp(message.mtext, "Request") == 0 )
+						if(ptr->resources.requestF == 1)
 						{
 							ptr->resources.requestF = 0;
 							int resourceIndex = rand() % (19 + 0 - 0) + 0;
@@ -233,60 +204,97 @@ int main(int argc, char* argv[]) {
 						}	
 						}
 
-						if(ptr->resources.termF == 1)//strcmp(message.mtext, "Terminated") == 0 )
+						if(ptr->resources.termF == 1)
 						{
 							ptr->resources.termF = 0;
-							//trackProcessTerminated++;
 							fprintf(fp,"Master terminating P%d at %d:%d\n",pid, ptr->time.seconds,ptr->time.nanoseconds);
 							stillActive[pid] = -1;
 
 							release(pid,0);
 						}
 
-						if(ptr->resources.releaseF == 1)//strcmp(message.mtext, "Release") == 0 )
+						if(ptr->resources.releaseF == 1)
 						{
 							ptr->resources.releaseF = 0;
 							release(pid,0);
 						}
 
-						if(pidNum < 17)
-						{			
-							pidNum++;	
-						} 
-						else 
-						{
-						
-							int k,w=0;
-							for(k =0; k < 20; k++)
-							{
-								if(blockedQueue[k] != -1)
-								{
-									w++;
-								}
-							}
-
-							if(w > 0 )//&& ptr->time.seconds == deadLockCheck.seconds)
-							{
-								deadLockCheck.seconds++;
-                                                                checkDeadLockDetection();
-							}
-
-							pidNum = 0;		
-							
-							int i = 0;
-							for(i = 0; i <20; i++)
-							{
-								blockedQueue[i] = -1;
-							}		
-							blockPtr = 0;
-						
-						}
-
-					//}
+						rundeadlock();
 			}
 		}
 	detach();
 	return 0;
+}
+
+void checkTermination()
+{
+	int l;	
+	for(l=0; l<18;l++){
+		if(stillActive[l] == -1){
+			termed++;					
+		} 
+	}
+						
+	if(termed == 18){					
+		detach();
+ 		return 0;
+
+		} else {
+			termed = 0;
+		}
+
+	if(stillActive[pidNum] != -1){
+		pid = stillActive[pidNum];
+		} else {	
+							
+		int s = pidNum;
+		for(s=pidNum; s<18;s++){
+		if(stillActive[s] == -1){
+			pidNum++;
+		} else {
+		break;
+		}
+
+		}
+							
+		pid = stillActive[pidNum];
+
+		}	
+}
+
+void rundeadlock()
+{
+	if(pidNum < 17)
+	{			
+		pidNum++;	
+	} 
+	else 
+	{
+						
+		int k,w=0;
+		for(k =0; k < 20; k++)
+		{
+			if(blockedQueue[k] != -1)
+			{
+				w++;
+			}
+		}
+		if(w > 0 )
+		{
+			deadLockCheck.seconds++;
+                        deadlockAlgo();
+		}
+
+		pidNum = 0;		
+							
+		int i = 0;
+		for(i = 0; i <20; i++)
+		{
+			blockedQueue[i] = -1;
+		}		
+		blockPtr = 0;
+						
+	}	
 }
 
 void addClock(struct time* time, int sec, int ns){
@@ -325,7 +333,7 @@ void release(int pid, int dl)
 {
 	int i = 0, j = 0;
 	int validationArray[20];
-	int returnResult = 0;
+	int numberRes = 0;
 	
 	for(i=0; i < 20; i++) 
 	{
@@ -343,11 +351,11 @@ void release(int pid, int dl)
 		} 
 		else if(ptr->resourceDescriptor[pid].allocated[i] == 0)
 		{
-			returnResult++;
+			numberRes++;
 		}
 	}
 	
-	if(returnResult == 20)
+	if(numberRes == 20)
 	{
 		fprintf(fp,"None\n");
 	} 
@@ -371,23 +379,22 @@ void release(int pid, int dl)
 	}
 }
 
-void checkDeadLockDetection() 
+void deadlockAlgo() 
 {
-	//timesDeadlockRun++;
 	fprintf(fp,"\nCurrent system resources\n");
 	fprintf(fp,"Master running deadlock detection at time %d:%d\n", ptr->time.seconds,ptr->time.nanoseconds);
 	int i = 0;
-	int manyBlock = 0;	
-	int average = 0;
+	int blockCount = 0;	
+	
 	for(i =0; i < 20; i++)
 	{
 		if(blockedQueue[i] != -1)
 		{
-			manyBlock++;
+			blockCount++;
 		}
 	}
 	fprintf(fp,"	Process ");
-	for(i =0; i < manyBlock; i++)
+	for(i =0; i < blockCount; i++)
 	{
 		fprintf(fp, "P%d, ", blockedQueue[i]);
 
@@ -395,7 +402,7 @@ void checkDeadLockDetection()
 	fprintf(fp,"deadlocked\n");
 	fprintf(fp,"	Attempting to resolve deadlock...\n");
 	
-	for(i =0; i < manyBlock; i++)
+	for(i =0; i < blockCount; i++)
 	{	
 		if(ptr->resources.available[resourceIndexQueue[i]] <= ptr->resourceDescriptor[blockedQueue[i]].request[resourceIndexQueue[i]] )
 		{
@@ -403,13 +410,12 @@ void checkDeadLockDetection()
 			fprintf(fp,"		");
 			release(blockedQueue[i],1);		
 			
-			if(i+1 < manyBlock)
+			if(i+1 < blockCount)
 			{
 				fprintf(fp,"	Master running deadlock detection after P%d killed\n",blockedQueue[i]);
 				fprintf(fp,"	Processes ");
-				//numTerminatedDeadLock++;
 				int m;
-				for(m=i+1; m <manyBlock; m++)
+				for(m=i+1; m <blockCount; m++)
 				{
 					fprintf(fp,"P%d, ",blockedQueue[m]);	
 				}
@@ -430,7 +436,7 @@ void checkDeadLockDetection()
 
 int checkBlocked(int pid, int resourceIndex) 
 {
-	if(ptr->resources.available[resourceIndex] > 0)//= ptr->resourceDescriptor[pid].request[resourceIndex] )
+	if(ptr->resources.available[resourceIndex] > 0)
 	{
 		return 1;
 	} 
