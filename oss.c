@@ -220,8 +220,10 @@ int main(int argc, char* argv[])
 						count++;
 		
 						if(cpid == 0) 
-						{		
-							execl("./user", "user",NULL);
+						{
+							char passPid[10];
+							sprintf(passPid, "%d", pid);		
+							execl("./user","user", NULL);
 							exit(0);
 						}
 

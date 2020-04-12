@@ -31,36 +31,62 @@ int main(int argc, char* argv[]) {
    
 	ptr = shmat(shmid, NULL, 0);
 
+	int timeBetweenActions = (rand() % 1000000 + 1);
+	struct time actionTime;
+	actionTime.seconds = ptr->time.seconds;
+	actionTime.nanoseconds = ptr->time.nanoseconds;
+	addClock(&actionTime, 0, timeBetweenActions);
+
+	int termination = (rand() % (250 * 1000000) + 1);
+	struct time nextTerminationCheck;
+	nextTerminationCheck.seconds = ptr->time.seconds;
+	nextTerminationCheck.nanoseconds = ptr->time.nanoseconds;
+	addClock(&nextTerminationCheck, 0, termination);
+
 	srand(getpid());
+
+	int pid = atoi(argv[0]);
 
 	while(1) 
 	{
 	
-		int chance = rand() % (100 + 1 - 1) + 1;
-		int chance1 = rand() % (100 + 1 - 1) + 1;
+		if((ptr->time.seconds > actionTime.seconds) || (ptr->time.seconds == actionTime.seconds && ptr->time.nanoseconds >= actionTime.nanoseconds))
+		{
+			actionTime.seconds = ptr->time.seconds;
+			actionTime.nanoseconds = ptr->time.nanoseconds;
+			addClock(&actionTime, 0, timeBetweenActions);
 
-		if(chance > 0 && chance < 63) 
-		{
-			ptr->resourceStruct.requestF = 1;
-			int resourceIndex = rand() % (19 + 0 - 0) + 0;
-			ptr->resourceStruct.index = resourceIndex;
-		} 
-		else 
-		{
-			ptr->resourceStruct.releaseF = 1;
+			int chanceToRequest = rand() % (100 + 1 - 1) + 1;
+
+			if(chanceToRequest < 70) 
+			{
+				ptr->resourceStruct.requestF = 1;
+				int resourceIndex = rand() % (19 + 0 - 0) + 0;
+				ptr->resourceStruct.index = resourceIndex;
+				//ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
+			} 
+			else 
+			{
+				ptr->resourceStruct.releaseF = 1;
+			}
 		}
-		if(chance1 < 10) 
+	int chanceToTerminate = rand() % (100 + 1 - 1) + 1;
+
+	if(ptr->time.seconds > 1)
+	{
+		if(chanceToTerminate < 10) 
 		{	
 			ptr->resourceStruct.termF = 1;
 		}
 		exit(0);
-	
+	}
 
 	}	
 	return 0;
 }
 
-void addClock(struct time* time, int sec, int ns){
+void addClock(struct time* time, int sec, int ns)
+{
 	time->seconds += sec;
 	time->nanoseconds += ns;
 	while(time->nanoseconds >= 1000000000){
