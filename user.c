@@ -23,7 +23,8 @@ void addClock(struct time* time, int sec, int ns);
 
 int main(int argc, char* argv[]) {
 
-     	if ((shmid = shmget(9784, sizeof(SharedMemory), 0600)) < 0) {
+     	if ((shmid = shmget(9784, sizeof(SharedMemory), 0600)) < 0) 
+	{
             perror("Error: shmget");
             exit(errno);
      	}
@@ -38,17 +39,20 @@ int main(int argc, char* argv[]) {
 		int chance = rand() % (100 + 1 - 1) + 1;
 		int chance1 = rand() % (100 + 1 - 1) + 1;
 
-		if(chance > 0 && chance < 63) {
+		if(chance > 0 && chance < 63) 
+		{
 			ptr->resourceStruct.requestF = 1;
-
-		} else {
+			int resourceIndex = rand() % (19 + 0 - 0) + 0;
+			ptr->resourceStruct.index = resourceIndex;
+		} 
+		else 
+		{
 			ptr->resourceStruct.releaseF = 1;
-
 		}
-			if(chance1 < 10) 
-			{	
-				ptr->resourceStruct.termF = 1;
-			}
+		if(chance1 < 10) 
+		{	
+			ptr->resourceStruct.termF = 1;
+		}
 		exit(0);
 	
 

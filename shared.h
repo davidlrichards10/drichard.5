@@ -9,11 +9,6 @@ struct time{
 typedef struct {
        	int allocated[20];
        	int request[20];
-	int max[20];
-        int available[20];
-        int termF;
-        int requestF;
-        int releaseF;
 } resourceDescriptor;
 
 typedef struct {
@@ -22,6 +17,7 @@ typedef struct {
         int termF;
         int requestF;
         int releaseF;
+	int index;
 } resourceInfo;
 
 typedef struct shared_memory_object {

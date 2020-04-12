@@ -57,10 +57,10 @@ int main(int argc, char* argv[])
 		{
 			case 'h':
 				printf("\nInvocation: oss [-h] [-i x -v x -t x]\n");
-                		printf("------------------------------------------Program Options-----------------------------------\n");
+                		printf("----------------------------------------------Program Options-------------------------------------------\n");
                 		printf("       -h             Describe how the project should be run and then, terminate\n");
 				printf("       -i             Type file name to print program information in (Default of log)\n");
-				printf("       -v             Indicate whether you want verbose on/off by typing 1 or 0 (Default on)\n");
+				printf("       -v             Indicate whether you want verbose on/off by typing [-v 1] for on (Default off)\n");
 				printf("       -t             Indicate timer amount (Default of 10 seconds)\n");				
 				exit(0);
 				break;
@@ -93,7 +93,8 @@ int main(int argc, char* argv[])
 	srand(time(NULL));
 	int count = 0;	
 
-	if ((shmid = shmget(9784, sizeof(SharedMemory), IPC_CREAT | 0600)) < 0) {
+	if ((shmid = shmget(9784, sizeof(SharedMemory), IPC_CREAT | 0600)) < 0) 
+	{
         	perror("Error: shmget");
         	exit(errno);
 	}
@@ -154,9 +155,11 @@ int main(int argc, char* argv[])
 	deadLockCheck.seconds = 1;
 	
 	alarm(timer);
-	while(totalCount < maxPro || count > 0){ 							
+	while(totalCount < maxPro || count > 0)
+	{ 							
 		
-			if(waitpid(cpid,NULL, WNOHANG)> 0){
+			if(waitpid(cpid,NULL, WNOHANG)> 0)
+			{
 				count--;
 			}
 
@@ -166,38 +169,48 @@ int main(int argc, char* argv[])
 			
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{			
-						 int l;
-        					for(l=0; l<18;l++){
-                					if(stillActive[l] == -1){
+						int l;
+        					for(l=0; l<18;l++)
+						{
+                					if(stillActive[l] == -1)
+							{
                         					termed++;
                 					}
         					}
 
-        					if(termed == 18){
-                					
+        					if(termed == 18)
+						{	
 							detach();
                 					printStats();
 							return 0;
 
-                					} else {
-                        					termed = 0;
+                				} 
+						else 
+						{
+                        				termed = 0;
+                				}
+
+        					if(stillActive[pidNum] != -1)
+						{
+                					pid = stillActive[pidNum];
+                				} 
+						else 
+						{
+                					int s = pidNum;
+                					for(s=pidNum; s<18;s++)
+							{
+                						if(stillActive[s] == -1)
+								{
+                        						pidNum++;
+                						} 
+								else 
+								{
+                							break;
+                						}
+
                 					}
 
-        					if(stillActive[pidNum] != -1){
                 					pid = stillActive[pidNum];
-                				} else {
-
-                				int s = pidNum;
-                				for(s=pidNum; s<18;s++){
-                				if(stillActive[s] == -1){
-                        				pidNum++;
-                				} else {
-                				break;
-                				}
-
-                				}
-
-                				pid = stillActive[pidNum];
 
                 				}
 	
@@ -206,20 +219,18 @@ int main(int argc, char* argv[])
 						totalCount++;
 						count++;
 		
-						if(cpid < 0) {
-							perror("Fork failed");
-						} else if(cpid == 0) {		
+						if(cpid == 0) 
+						{		
 							execl("./user", "user",NULL);
 							exit(0);
-						} else {
-			
 						}
 
 						if(ptr->resourceStruct.requestF == 1)
 						{
 							ptr->resourceStruct.requestF = 0;
-							int resourceIndex = rand() % (19 + 0 - 0) + 0;
+							int resourceIndex = ptr->resourceStruct.index;//rand() % (19 + 0 - 0) + 0;
 							ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
+							
 							if(verbose == 1 && lineCounter < 10000)
 							{
 								fprintf(fp,"Master has detected Process P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
@@ -227,27 +238,33 @@ int main(int argc, char* argv[])
 							}
 							int resultBlocked = checkBlocked(pid,resourceIndex);
 
-							if(resultBlocked == 0){
+							if(resultBlocked == 0)
+							{
 								if(verbose == 1 && lineCounter < 10000)
 								{
-									fprintf(fp,"Master blocking P%d requesting R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
+									fprintf(fp,"Master putting P%d in wait for R%d at time %d:%d\n",pid, resourceIndex, ptr->time.seconds,ptr->time.nanoseconds);
 									lineCounter++;
 								}
 								int f, duplicate = 0;
-								for(f=0; f< 18; f++){
-									if(blockedQueue[f] == pid){
+								
+								for(f=0; f< 18; f++)
+								{
+									if(blockedQueue[f] == pid)
+									{
 										duplicate++;
 									}
 								}
 								
-								if(duplicate == 0){
+								if(duplicate == 0)
+								{
 									blockedQueue[blockPtr] = pid;
 									resourceIndexQueue[blockPtr] = resourceIndex;
-								} else {
+								} 
+								else 
+								{
 									duplicate = 0;
 								}
 								blockPtr++;					
-
 							} 
 							else 
 							{
@@ -272,17 +289,19 @@ int main(int argc, char* argv[])
 										{
                 									p = j;
                         								fprintf(fp,"P%d  ",p);
-                								for(i = 0; i < 20; i++) {
+                								for(i = 0; i < 20; i++) 
+										{
                                 							fprintf(fp,"%d ", ptr->descriptor[p].allocated[i]);
 
                         							}
-                        							fprintf(fp,"\n");
-        								}
+                        								fprintf(fp,"\n");
+        									}
 									}
 									fprintf(fp,"\n");	
 									lineCounter+=18;
 								}	
 							}
+							//ptr->resourceStruct.index = 0;
 						}
 
 						if(ptr->resourceStruct.termF == 1)
@@ -363,10 +382,13 @@ void rundeadlock()
 	}	
 }
 
-void addClock(struct time* time, int sec, int ns){
+void addClock(struct time* time, int sec, int ns)
+{
 	time->seconds += sec;
 	time->nanoseconds += ns;
-	while(time->nanoseconds >= 1000000000){
+	
+	while(time->nanoseconds >= 1000000000)
+	{
 		time->nanoseconds -=1000000000;
 		time->seconds++;
 	}
@@ -374,8 +396,6 @@ void addClock(struct time* time, int sec, int ns){
 
 void detach()
 {
-	//sem_unlink("clocksem");
-	//msgctl(messageQueueId,IPC_RMID,NULL);
 	shmctl(shmid, IPC_RMID, NULL);	
 }
 
@@ -392,6 +412,7 @@ void sigErrors(int signum)
         }
 	
 	detach();
+	printStats();
         exit(0);
 }
 
@@ -535,5 +556,3 @@ void allocated(int pid, int resourceIndex)
 	}
 	ptr->descriptor[pid].allocated[resourceIndex] = ptr->descriptor[pid].request[resourceIndex];
 }
-
-
