@@ -20,7 +20,7 @@ int child_id;
 SharedMemory* ptr;
 sem_t *sem;
 
-void addClock(struct time* time, int sec, int ns);
+void incClock(struct time* time, int sec, int ns);
 
 int main(int argc, char* argv[]) 
 {
@@ -34,32 +34,42 @@ int main(int argc, char* argv[])
 
 	ptr = shmat(shmid, NULL, 0);
 
-	int timeBetweenActions = (rand() % 1000000 + 1);
-	struct time actionTime;
+	int nextMove = (rand() % 1000000 + 1);
+	struct time moveTime;
 	sem_wait(sem);
-	actionTime.seconds = ptr->time.seconds;
-	actionTime.nanoseconds = ptr->time.nanoseconds;
+	moveTime.seconds = ptr->time.seconds;
+	moveTime.nanoseconds = ptr->time.nanoseconds;
 	sem_post(sem);
-	//addClock(&actionTime, 0, timeBetweenActions);
+	//incClock(&moveTime, 0, nextMove);
 
-	srand(getpid());
+	int termination = (rand() % (250 * 1000000) + 1);
+	struct time termCheck;
+	termCheck.seconds = ptr->time.seconds;
+	termCheck.nanoseconds = ptr->time.nanoseconds;
+	//incClock(&termCheck, 0, termination);
+
+	//srand(getpid());
+
+	time_t t;
+	time(&t);	
+	srand((int)time(&t) % getpid());
 
 	int pid = atoi(argv[0]);
 
 	while(1) 
 	{
 	
-		if((ptr->time.seconds > actionTime.seconds) || (ptr->time.seconds == actionTime.seconds && ptr->time.nanoseconds >= actionTime.nanoseconds))
+		if((ptr->time.seconds > moveTime.seconds) || (ptr->time.seconds == moveTime.seconds && ptr->time.nanoseconds >= moveTime.nanoseconds))
 		{
 			sem_wait(sem);
-			actionTime.seconds = ptr->time.seconds;
-			actionTime.nanoseconds = ptr->time.nanoseconds;
+			moveTime.seconds = ptr->time.seconds;
+			moveTime.nanoseconds = ptr->time.nanoseconds;
 			sem_post(sem);
-			addClock(&actionTime, 0, timeBetweenActions);
+			incClock(&moveTime, 0, nextMove);
 
 			int chanceToRequest = rand() % (100 + 1 - 1) + 1;
 
-			if(chanceToRequest < 70) 
+			if(chanceToRequest < 95) 
 			{
 				ptr->resourceStruct.requestF = 1;
 				int resourceIndex = rand() % (19 + 0 - 0) + 0;
@@ -71,19 +81,26 @@ int main(int argc, char* argv[])
 				ptr->resourceStruct.releaseF = 1;
 			}
 		}
-	int chanceToTerminate = rand() % (100 + 1 - 1) + 1;
+		int chanceToTerminate = rand() % (100 + 1 - 1) + 1;
 
-		if(chanceToTerminate < 10) 
-		{	
-			ptr->resourceStruct.termF = 1;
+		if((ptr->time.seconds > termCheck.seconds) || (ptr->time.seconds == termCheck.seconds && ptr->time.nanoseconds >= termCheck.nanoseconds))
+		{
+			termination = (rand() % (250 * 1000000) + 1);
+			termCheck.seconds = ptr->time.seconds;
+			termCheck.nanoseconds = ptr->time.nanoseconds;
+			incClock(&termCheck, 0, termination);
+			
+			if(chanceToTerminate < 10) 
+			{	
+				ptr->resourceStruct.termF = 1;
+			}
+			exit(0);
 		}
-		exit(0);
-
 	}	
 	return 0;
 }
 
-void addClock(struct time* time, int sec, int ns)
+void incClock(struct time* time, int sec, int ns)
 {
 	sem_wait(sem);
 	time->seconds += sec;

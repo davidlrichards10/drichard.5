@@ -22,6 +22,7 @@ int requestGranted = 0;
 int deadlockTermination = 0;
 int normalTermination = 0;
 int numDeadlockRan = 0;
+int deadLockCheck = 1;
 
 int sharedResources[4];
 int blockedQueue[20];
@@ -36,7 +37,7 @@ void deadlockAlgo();
 void allocated(int pid, int resourceIndex);
 void detach();
 void sigErrors();
-void addClock(struct time* time, int sec, int ns);
+void incClock(struct time* time, int sec, int ns);
 void rundeadlock();
 void printStats();
 
@@ -154,8 +155,8 @@ int main(int argc, char* argv[])
         }
 
 	struct time randFork;
-	struct time deadLockCheck;
-	deadLockCheck.seconds = 1;
+	//struct time deadLockCheck;
+	//deadLockCheck.seconds = 1;
 	
 	alarm(timer);
 	while(totalCount < maxPro || count > 0)
@@ -166,9 +167,9 @@ int main(int argc, char* argv[])
 				count--;
 			}
 
-			addClock(&ptr->time,0,30000);
+			incClock(&ptr->time,0,80000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
-			addClock(&randFork,0,nextFork);
+			incClock(&randFork,0,nextFork);
 			
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{
@@ -177,7 +178,7 @@ int main(int argc, char* argv[])
 						randFork.nanoseconds = ptr->time.nanoseconds;
 						sem_post(sem);
 						nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
-						addClock(&randFork,0,nextFork);			
+						incClock(&randFork,0,nextFork);			
 						int l;
         					for(l=0; l<18;l++)
 						{
@@ -317,7 +318,7 @@ int main(int argc, char* argv[])
 
 						if(ptr->resourceStruct.termF == 1)
 						{
-							deadLockCheck.seconds++;
+							//deadLockCheck.seconds++;
 							ptr->resourceStruct.termF = 0;
 							if(verbose == 1 && lineCounter < 10000)
 							{
@@ -376,12 +377,16 @@ void rundeadlock()
 				w++;
 			}
 		}
-		if(w > 0 )
+	printf("%d\n",ptr->time.seconds);
+	if(ptr->time.seconds == deadLockCheck)
+	{
+		if(w > 0) //|| ptr->time.seconds == deadLockCheck)
 		{
-                        deadlockAlgo();
+			deadLockCheck++;
+			deadlockAlgo();
 			numDeadlockRan++;
 		}
-
+	}
 		pidNum = 0;		
 							
 		int i = 0;
@@ -394,7 +399,7 @@ void rundeadlock()
 	}	
 }
 
-void addClock(struct time* time, int sec, int ns)
+void incClock(struct time* time, int sec, int ns)
 {
 	sem_wait(sem);
 	time->seconds += sec;
@@ -455,7 +460,7 @@ void release(int pid, int dl)
 			validationArray[i] = i;
 			if(verbose == 1)
 			{
-				fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);	
+				fprintf(fp,"R%d:%d \n",i, ptr->descriptor[pid].allocated[i]);	
 			}
 			j++;
 		} 
@@ -467,7 +472,7 @@ void release(int pid, int dl)
 	
 	if(numberRes == 20 && verbose == 1)
 	{
-		fprintf(fp,"None\n");
+		fprintf(fp," \n");
 	} 
 	else 
 	{
