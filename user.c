@@ -16,9 +16,10 @@
 
 int shmid; 
 int child_id;
-int chance[100];
-int chancePos =0;
+
 SharedMemory* ptr;
+sem_t *sem;
+
 void addClock(struct time* time, int sec, int ns);
 
 int main(int argc, char* argv[]) 
@@ -28,13 +29,17 @@ int main(int argc, char* argv[])
             perror("Error: shmget");
             exit(errno);
      	}
-   
+	
+	sem = sem_open("p5sem", 0);   
+
 	ptr = shmat(shmid, NULL, 0);
 
 	int timeBetweenActions = (rand() % 1000000 + 1);
 	struct time actionTime;
+	sem_wait(sem);
 	actionTime.seconds = ptr->time.seconds;
 	actionTime.nanoseconds = ptr->time.nanoseconds;
+	sem_post(sem);
 	//addClock(&actionTime, 0, timeBetweenActions);
 
 	srand(getpid());
@@ -46,9 +51,11 @@ int main(int argc, char* argv[])
 	
 		if((ptr->time.seconds > actionTime.seconds) || (ptr->time.seconds == actionTime.seconds && ptr->time.nanoseconds >= actionTime.nanoseconds))
 		{
+			sem_wait(sem);
 			actionTime.seconds = ptr->time.seconds;
 			actionTime.nanoseconds = ptr->time.nanoseconds;
-			//addClock(&actionTime, 0, timeBetweenActions);
+			sem_post(sem);
+			addClock(&actionTime, 0, timeBetweenActions);
 
 			int chanceToRequest = rand() % (100 + 1 - 1) + 1;
 
@@ -78,10 +85,13 @@ int main(int argc, char* argv[])
 
 void addClock(struct time* time, int sec, int ns)
 {
+	sem_wait(sem);
 	time->seconds += sec;
 	time->nanoseconds += ns;
-	while(time->nanoseconds >= 1000000000){
+	while(time->nanoseconds >= 1000000000)
+	{
 		time->nanoseconds -=1000000000;
 		time->seconds++;
 	}
+	sem_post(sem);
 }

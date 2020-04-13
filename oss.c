@@ -16,6 +16,7 @@
 
 int shmid; 
 SharedMemory* ptr;
+sem_t *sem;
 
 int requestGranted = 0;
 int deadlockTermination = 0;
@@ -98,6 +99,8 @@ int main(int argc, char* argv[])
         	perror("Error: shmget");
         	exit(errno);
 	}
+
+	sem = sem_open("p5sem", O_CREAT, 0777, 1);	
   
 	ptr = shmat(shmid, NULL, 0);
 
@@ -169,8 +172,10 @@ int main(int argc, char* argv[])
 			
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{
+						sem_wait(sem);
 						randFork.seconds = ptr->time.seconds;
 						randFork.nanoseconds = ptr->time.nanoseconds;
+						sem_post(sem);
 						nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 						addClock(&randFork,0,nextFork);			
 						int l;
@@ -312,6 +317,7 @@ int main(int argc, char* argv[])
 
 						if(ptr->resourceStruct.termF == 1)
 						{
+							deadLockCheck.seconds++;
 							ptr->resourceStruct.termF = 0;
 							if(verbose == 1 && lineCounter < 10000)
 							{
@@ -390,6 +396,7 @@ void rundeadlock()
 
 void addClock(struct time* time, int sec, int ns)
 {
+	sem_wait(sem);
 	time->seconds += sec;
 	time->nanoseconds += ns;
 	
@@ -398,11 +405,14 @@ void addClock(struct time* time, int sec, int ns)
 		time->nanoseconds -=1000000000;
 		time->seconds++;
 	}
+	sem_post(sem);
 }
 
 void detach()
 {
 	shmctl(shmid, IPC_RMID, NULL);	
+	sem_unlink("p5sem");
+	sem_close(sem);
 }
 
 /* Function to control two types of interupts */
@@ -411,11 +421,13 @@ void sigErrors(int signum)
         if (signum == SIGINT)
         {
 		printf("\nInterupted by ctrl-c\n");
-        }
+        	printStats();
+	}
         else
         {
                 printf("\nInterupted by %d second alarm\n", timer);
-        }
+        	printStats();
+	}
 	
 	detach();
 	printStats();
