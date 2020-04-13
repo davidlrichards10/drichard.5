@@ -21,8 +21,8 @@ int chancePos =0;
 SharedMemory* ptr;
 void addClock(struct time* time, int sec, int ns);
 
-int main(int argc, char* argv[]) {
-
+int main(int argc, char* argv[]) 
+{
      	if ((shmid = shmget(9784, sizeof(SharedMemory), 0600)) < 0) 
 	{
             perror("Error: shmget");
@@ -35,13 +35,7 @@ int main(int argc, char* argv[]) {
 	struct time actionTime;
 	actionTime.seconds = ptr->time.seconds;
 	actionTime.nanoseconds = ptr->time.nanoseconds;
-	addClock(&actionTime, 0, timeBetweenActions);
-
-	int termination = (rand() % (250 * 1000000) + 1);
-	struct time nextTerminationCheck;
-	nextTerminationCheck.seconds = ptr->time.seconds;
-	nextTerminationCheck.nanoseconds = ptr->time.nanoseconds;
-	addClock(&nextTerminationCheck, 0, termination);
+	//addClock(&actionTime, 0, timeBetweenActions);
 
 	srand(getpid());
 
@@ -54,7 +48,7 @@ int main(int argc, char* argv[]) {
 		{
 			actionTime.seconds = ptr->time.seconds;
 			actionTime.nanoseconds = ptr->time.nanoseconds;
-			addClock(&actionTime, 0, timeBetweenActions);
+			//addClock(&actionTime, 0, timeBetweenActions);
 
 			int chanceToRequest = rand() % (100 + 1 - 1) + 1;
 
@@ -63,7 +57,7 @@ int main(int argc, char* argv[]) {
 				ptr->resourceStruct.requestF = 1;
 				int resourceIndex = rand() % (19 + 0 - 0) + 0;
 				ptr->resourceStruct.index = resourceIndex;
-				//ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
+
 			} 
 			else 
 			{
@@ -72,14 +66,11 @@ int main(int argc, char* argv[]) {
 		}
 	int chanceToTerminate = rand() % (100 + 1 - 1) + 1;
 
-	if(ptr->time.seconds > 1)
-	{
 		if(chanceToTerminate < 10) 
 		{	
 			ptr->resourceStruct.termF = 1;
 		}
 		exit(0);
-	}
 
 	}	
 	return 0;

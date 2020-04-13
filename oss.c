@@ -163,12 +163,16 @@ int main(int argc, char* argv[])
 				count--;
 			}
 
-			addClock(&ptr->time,0,190000);
+			addClock(&ptr->time,0,30000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 			addClock(&randFork,0,nextFork);
 			
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
-			{			
+			{
+						randFork.seconds = ptr->time.seconds;
+						randFork.nanoseconds = ptr->time.nanoseconds;
+						nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
+						addClock(&randFork,0,nextFork);			
 						int l;
         					for(l=0; l<18;l++)
 						{
@@ -230,7 +234,7 @@ int main(int argc, char* argv[])
 						if(ptr->resourceStruct.requestF == 1)
 						{
 							ptr->resourceStruct.requestF = 0;
-							int resourceIndex = ptr->resourceStruct.index;//rand() % (19 + 0 - 0) + 0;
+							int resourceIndex = ptr->resourceStruct.index;
 							ptr->descriptor[pid].request[resourceIndex] = rand() % (10 + 1 - 1) + 1;
 							
 							if(verbose == 1 && lineCounter < 10000)
@@ -303,7 +307,7 @@ int main(int argc, char* argv[])
 									lineCounter+=18;
 								}	
 							}
-							//ptr->resourceStruct.index = 0;
+
 						}
 
 						if(ptr->resourceStruct.termF == 1)
