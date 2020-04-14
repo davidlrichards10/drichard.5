@@ -23,7 +23,7 @@ int deadlockTermination = 0;
 int normalTermination = 0;
 int numDeadlockRan = 0;
 int deadLockCheck = 1;
-int average = 0;
+float average = 0;
 
 int sharedResources[4];
 int blockedQueue[20];
@@ -368,7 +368,7 @@ void printStats()
         printf("Total processes terminated in deadlock algo = %d\n", deadlockTermination);
         printf("Total processes terminated normally = %d\n", normalTermination);
         printf("Total times deadlock algo ran = %d\n", numDeadlockRan);
-	printf("Percent of process terminated in a deadlock on average = %d\n", average); /// numDeadlockRan);
+	printf("Percent of process terminated in a deadlock on average = %.3f%\n\n", (average / numDeadlockRan) * 100);
 }
 
 void rundeadlock()
@@ -571,9 +571,9 @@ void deadlockAlgo()
 	fprintf(fp,"\nCurrent system resources\n");
 	fprintf(fp,"Master running deadlock detection at time %d:%d\n", ptr->time.seconds,ptr->time.nanoseconds);
 	int i = 0;
-	int blockCount = 0;	
-	int terminated = 0;
-	int averageDL = 0;
+	float blockCount = 0;	
+	float terminated = 0;
+	float averageDL = 0;
 
 	for(i =0; i < 20; i++)
 	{
