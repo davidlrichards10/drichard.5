@@ -344,7 +344,6 @@ int main(int argc, char* argv[])
                 								for(i = 0; i < 20; i++) 
 										{
                                 							fprintf(fp,"%d   ", ptr->descriptor[p].allocated[i]);
-
                         							}
                         								fprintf(fp,"\n");
         									}
