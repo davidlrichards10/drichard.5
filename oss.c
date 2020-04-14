@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 				count--;
 			}
 
-			incClock(&ptr->time,0,80000);
+			incClock(&ptr->time,0,70000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 			incClock(&randFork,0,nextFork);
 			
@@ -298,15 +298,21 @@ int main(int argc, char* argv[])
 									int p = 0;
         								int j;
         								int i;
+									fprintf(fp,"   ");
+									for(j=1; j <= 20; j++)
+									{
+										fprintf(fp,"R%d  ", j);
+									}
+									fprintf(fp,"\n");
         								for(j =0; j <18; j++)
 									{
 										if(stillActive[j] != -1)
 										{
                 									p = j;
-                        								fprintf(fp,"P%d  ",p);
+                        								fprintf(fp,"P%d   ",p);
                 								for(i = 0; i < 20; i++) 
 										{
-                                							fprintf(fp,"%d ", ptr->descriptor[p].allocated[i]);
+                                							fprintf(fp,"%d   ", ptr->descriptor[p].allocated[i]);
 
                         							}
                         								fprintf(fp,"\n");
@@ -383,15 +389,15 @@ void rundeadlock()
 			}
 		}
 	//printf("%d\n",ptr->time.seconds);
-	if(ptr->time.seconds == deadLockCheck)
-	{
-		if(w > 0) //|| ptr->time.seconds == deadLockCheck)
+	//if(ptr->time.seconds == deadLockCheck)
+	//{
+		if(w > 0 &&  ptr->time.seconds == deadLockCheck)
 		{
 			deadLockCheck++;
 			deadlockAlgo();
 			numDeadlockRan++;
 		}
-	}
+	//}
 		pidNum = 0;		
 							
 		int i = 0;
@@ -593,6 +599,8 @@ void deadlockAlgo()
 			//average+=terminated;
 			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
+			//stillActive[i] = -1;
+			//ptr->resourceStruct.termF == 1;
 			deadlockTermination++;
 			releasedl(blockedQueue[i],1);		
 			

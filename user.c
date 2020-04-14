@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
 	moveTime.seconds = ptr->time.seconds;
 	moveTime.nanoseconds = ptr->time.nanoseconds;
 	sem_post(sem);
-	incClock(&moveTime, 0, nextMove);
+	//incClock(&moveTime, 0, nextMove);
 
 	int termination = (rand() % (250 * 1000000) + 1);
 	struct time termCheck;
