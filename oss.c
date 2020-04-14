@@ -40,6 +40,7 @@ void detach();
 void sigErrors();
 void incClock(struct time* time, int sec, int ns);
 void rundeadlock();
+void releasedl(int pid, int dl);
 void printStats();
 
 int timer = 10;
@@ -276,6 +277,7 @@ int main(int argc, char* argv[])
 								else 
 								{
 									duplicate = 0;
+
 								}
 								blockPtr++;					
 							} 
@@ -463,7 +465,7 @@ void release(int pid, int dl)
 			validationArray[i] = i;
 			if(verbose == 1)
 			{
-				fprintf(fp,"R%d:%d \n",i, ptr->descriptor[pid].allocated[i]);	
+				fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);	
 			}
 			j++;
 		} 
@@ -500,6 +502,64 @@ void release(int pid, int dl)
 	}
 }
 
+void releasedl(int pid, int dl)
+{
+        int i = 0, j = 0;
+        int validationArray[20];
+        int numberRes = 0;
+
+        for(i=0; i < 20; i++)
+        {
+                validationArray[i] = 0;
+        }
+                if(verbose == 0)
+                {
+                        fprintf(fp,"Master releasing P%d, Resources are: ",pid);
+                }
+        for(i=0; i < 20; i++)
+        {
+                if(ptr->descriptor[pid].allocated[i] > 0)
+                {
+                        validationArray[i] = i;
+                        if(verbose == 0)
+                        {
+                                fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);
+                        }
+                        j++;
+                }
+                else if(ptr->descriptor[pid].allocated[i] == 0)
+                {
+                        numberRes++;
+                }
+        }
+
+        if(numberRes == 20 && verbose == 0)
+        {
+                fprintf(fp," \n");
+        }
+        else
+        {
+                if(verbose == 0)
+                {
+                        fprintf(fp,"\n");
+                }
+                int i;
+
+                for(i=0; i < 20; i++)
+                {
+                        if(i == sharedResources[0] || i == sharedResources[1] || i == sharedResources[2] || i == sharedResources[3])
+                        {
+                                ptr->descriptor[pid].allocated[i] = 0;
+                        }
+                        else
+                        {
+                                ptr->resourceStruct.available[i] += ptr->descriptor[pid].allocated[i];
+                                ptr->descriptor[pid].allocated[i] = 0;
+                        }
+                }
+        }
+}
+
 void deadlockAlgo() 
 {
 	fprintf(fp,"\nCurrent system resources\n");
@@ -534,7 +594,7 @@ void deadlockAlgo()
 			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
 			deadlockTermination++;
-			release(blockedQueue[i],1);		
+			releasedl(blockedQueue[i],1);		
 			
 			if(i+1 < blockCount)
 			{
