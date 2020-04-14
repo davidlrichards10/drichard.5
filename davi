@@ -1,0 +1,575 @@
+Master has detected Process P12 requesting R10 at time 0:910000
+Master granting P12  request R10 at time 0:910000
+Master has detected Process P13 requesting R14 at time 0:980000
+Master granting P13  request R14 at time 0:980000
+Master has detected Process P14 requesting R14 at time 0:1050000
+Master granting P14  request R14 at time 0:1050000
+Master has detected Process P0 requesting R6 at time 0:87570000
+Master granting P0  request R6 at time 0:87570000
+Master releasing P0, Resources are: R6:9 
+Master has detected Process P1 requesting R15 at time 0:116970000
+Master granting P1  request R15 at time 0:116970000
+Master has detected Process P2 requesting R9 at time 0:144060000
+Master granting P2  request R9 at time 0:144060000
+Master has detected Process P3 requesting R13 at time 0:169890000
+Master granting P3  request R13 at time 0:169890000
+Master terminating P3 at 0:169890000
+Master releasing P3, Resources are: R13:2 
+Master has detected Process P4 requesting R0 at time 0:195160000
+Master granting P4  request R0 at time 0:195160000
+Master has detected Process P5 requesting R6 at time 0:221900000
+Master granting P5  request R6 at time 0:221900000
+Master terminating P5 at 0:221900000
+Master releasing P5, Resources are: R6:5 
+Master has detected Process P6 requesting R12 at time 0:248990000
+Master granting P6  request R12 at time 0:248990000
+Master has detected Process P7 requesting R17 at time 0:279300000
+Master granting P7  request R17 at time 0:279300000
+Master has detected Process P8 requesting R10 at time 0:307720000
+Master granting P8  request R10 at time 0:307720000
+Master has detected Process P9 requesting R13 at time 0:337120000
+Master granting P9  request R13 at time 0:337120000
+Master has detected Process P10 requesting R9 at time 0:364700000
+Master putting P10 in wait for R9 at time 0:364700000
+Master has detected Process P11 requesting R16 at time 0:391510000
+Master granting P11  request R16 at time 0:391510000
+Master has detected Process P12 requesting R9 at time 0:417340000
+Master putting P12 in wait for R9 at time 0:417340000
+Master has detected Process P13 requesting R14 at time 0:444290000
+Master granting P13  request R14 at time 0:444290000
+Master has detected Process P14 requesting R16 at time 0:471660000
+Master granting P14  request R16 at time 0:471660000
+Master has detected Process P15 requesting R2 at time 1:20000
+Master granting P15  request R2 at time 1:20000
+Master has detected Process P16 requesting R16 at time 1:30330000
+Master putting P16 in wait for R16 at time 1:30330000
+Master has detected Process P17 requesting R7 at time 1:56160000
+Master granting P17  request R7 at time 1:56160000
+
+Current system resources
+Master running deadlock detection at time 1:56160000
+	Process P10, P12, P16, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P10
+			Master running deadlock detection after P10 killed
+	Processes P12, P16, deadlocked
+	Killing process P12
+			Master running deadlock detection after P12 killed
+	Processes P16, deadlocked
+	Killing process P16
+		System is no longer in deadlock
+
+Master has detected Process P0 requesting R7 at time 1:82060000
+Master putting P0 in wait for R7 at time 1:82060000
+Master has detected Process P1 requesting R5 at time 1:108170000
+Master granting P1  request R5 at time 1:108170000
+Master has detected Process P2 requesting R5 at time 1:133720000
+Master granting P2  request R5 at time 1:133720000
+
+
+Current Resource Table
+   R1  R2  R3  R4  R5  R6  R7  R8  R9  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  R20  
+P0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P1   0   0   0   0   0   2   0   0   0   0   0   0   0   0   0   1   0   0   0   0   
+P2   0   0   0   0   0   6   0   0   0   2   0   0   0   0   0   0   0   0   0   0   
+P4   4   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P6   0   0   0   0   0   0   0   0   0   0   0   0   6   0   0   0   0   0   0   0   
+P7   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   8   0   0   
+P8   0   0   0   0   0   0   0   0   0   0   7   0   0   0   0   0   0   0   0   0   
+P9   0   0   0   0   0   0   0   0   0   0   0   0   0   7   0   0   0   0   0   0   
+P10   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P11   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   1   0   0   0   
+P12   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P13   0   0   0   0   0   0   0   0   0   0   0   0   0   0   8   0   0   0   0   0   
+P14   0   0   0   0   0   0   0   0   0   0   0   0   0   0   5   0   9   0   0   0   
+P15   0   0   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P16   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P17   0   0   0   0   0   0   0   8   0   0   0   0   0   0   0   0   0   0   0   0   
+
+Master has detected Process P4 requesting R9 at time 1:156260000
+Master putting P4 in wait for R9 at time 1:156260000
+Master has detected Process P6 requesting R17 at time 1:181180000
+Master granting P6  request R17 at time 1:181180000
+Master terminating P6 at 1:181180000
+Master releasing P6, Resources are: R12:6 R17:1 
+Master has detected Process P7 requesting R16 at time 1:207850000
+Master putting P7 in wait for R16 at time 1:207850000
+Master has detected Process P8 requesting R3 at time 1:233400000
+Master granting P8  request R3 at time 1:233400000
+Master has detected Process P9 requesting R17 at time 1:259230000
+Master granting P9  request R17 at time 1:259230000
+Master terminating P9 at 1:259230000
+Master releasing P9, Resources are: R13:7 R17:1 
+Master has detected Process P10 requesting R13 at time 1:284850000
+Master granting P10  request R13 at time 1:284850000
+Master has detected Process P11 requesting R6 at time 1:311730000
+Master granting P11  request R6 at time 1:311730000
+Master has detected Process P12 requesting R3 at time 1:339380000
+Master granting P12  request R3 at time 1:339380000
+Master has detected Process P13 requesting R7 at time 1:365910000
+Master putting P13 in wait for R7 at time 1:365910000
+Master has detected Process P14 requesting R14 at time 1:392720000
+Master granting P14  request R14 at time 1:392720000
+Master terminating P14 at 1:392720000
+Master releasing P14, Resources are: R14:8 R16:9 
+Master has detected Process P15 requesting R4 at time 1:425690000
+Master granting P15  request R4 at time 1:425690000
+Master has detected Process P16 requesting R2 at time 1:453340000
+Master putting P16 in wait for R2 at time 1:453340000
+Master has detected Process P17 requesting R18 at time 1:482670000
+Master granting P17  request R18 at time 1:482670000
+Master has detected Process P0 requesting R4 at time 2:40000
+Master granting P0  request R4 at time 2:40000
+Master has detected Process P1 requesting R17 at time 2:30140000
+Master granting P1  request R17 at time 2:30140000
+Master has detected Process P2 requesting R12 at time 2:53100000
+Master granting P2  request R12 at time 2:53100000
+Master has detected Process P4 requesting R10 at time 2:79070000
+Master granting P4  request R10 at time 2:79070000
+Master has detected Process P7 requesting R5 at time 2:104760000
+Master putting P7 in wait for R5 at time 2:104760000
+Master terminating P7 at 2:104760000
+Master releasing P7, Resources are: R17:8 
+Master has detected Process P8 requesting R18 at time 2:131710000
+Master putting P8 in wait for R18 at time 2:131710000
+Master releasing P10, Resources are: R13:6 
+Master has detected Process P11 requesting R13 at time 2:185750000
+Master granting P11  request R13 at time 2:185750000
+Master releasing P12, Resources are: R3:8 
+Master has detected Process P13 requesting R1 at time 2:238740000
+Master granting P13  request R1 at time 2:238740000
+Master has detected Process P15 requesting R2 at time 2:265550000
+Master putting P15 in wait for R2 at time 2:265550000
+Master has detected Process P16 requesting R11 at time 2:291380000
+Master granting P16  request R11 at time 2:291380000
+Master has detected Process P17 requesting R16 at time 2:317630000
+Master granting P17  request R16 at time 2:317630000
+
+Current system resources
+Master running deadlock detection at time 2:317630000
+	Process P7, P8, P15, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P7
+			Master running deadlock detection after P7 killed
+	Processes P8, P15, deadlocked
+	Killing process P8
+			Master running deadlock detection after P8 killed
+	Processes P15, deadlocked
+	Killing process P15
+		System is no longer in deadlock
+
+Master has detected Process P0 requesting R7 at time 2:342200000
+Master putting P0 in wait for R7 at time 2:342200000
+Master has detected Process P1 requesting R13 at time 2:368660000
+Master granting P1  request R13 at time 2:368660000
+Master has detected Process P2 requesting R18 at time 2:396590000
+Master putting P2 in wait for R18 at time 2:396590000
+Master terminating P2 at 2:396590000
+Master releasing P2, Resources are: R5:6 R9:2 R12:1 
+Master has detected Process P4 requesting R17 at time 2:423820000
+Master granting P4  request R17 at time 2:423820000
+Master terminating P4 at 2:423820000
+Master releasing P4, Resources are: R0:4 R10:1 R17:8 
+Master releasing P8, Resources are:  
+Master has detected Process P10 requesting R1 at time 2:479470000
+Master putting P10 in wait for R1 at time 2:479470000
+Master has detected Process P11 requesting R12 at time 3:60000
+Master granting P11  request R12 at time 3:60000
+
+
+Current Resource Table
+   R1  R2  R3  R4  R5  R6  R7  R8  R9  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  R20  
+P0   0   0   0   0   5   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P1   0   0   0   0   0   2   0   0   0   0   0   0   0   10   0   1   0   3   0   0   
+P8   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P10   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P11   0   0   0   0   0   0   2   0   0   0   0   0   1   1   0   0   1   0   0   0   
+P12   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P13   0   7   0   0   0   0   0   0   0   0   0   0   0   0   8   0   0   0   0   0   
+P15   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P16   0   0   0   0   0   0   0   0   0   0   0   10   0   0   0   0   0   0   0   0   
+P17   0   0   0   0   0   0   0   8   0   0   0   0   0   0   0   0   1   0   9   0   
+
+Master has detected Process P12 requesting R8 at time 3:32610000
+Master granting P12  request R8 at time 3:32610000
+Master has detected Process P13 requesting R17 at time 3:57390000
+Master granting P13  request R17 at time 3:57390000
+Master has detected Process P15 requesting R1 at time 3:84060000
+Master putting P15 in wait for R1 at time 3:84060000
+Master has detected Process P16 requesting R2 at time 3:110590000
+Master granting P16  request R2 at time 3:110590000
+Master terminating P16 at 3:110590000
+Master releasing P16, Resources are: R2:1 R11:10 
+Master releasing P17, Resources are: R7:8 R16:1 R18:9 
+
+Current system resources
+Master running deadlock detection at time 3:135720000
+	Process P0, P2, P10, P15, deadlocked
+	Attempting to resolve deadlock...
+	Master granting P0 request R7 at time 3:135720000
+	Killing process P2
+			Master running deadlock detection after P2 killed
+	Processes P10, P15, deadlocked
+	Killing process P10
+			Master running deadlock detection after P10 killed
+	Processes P15, deadlocked
+	Killing process P15
+		System is no longer in deadlock
+
+Master has detected Process P0 requesting R5 at time 3:161620000
+Master granting P0  request R5 at time 3:161620000
+Master releasing P1, Resources are: R5:2 R13:10 R15:1 R17:3 
+Master has detected Process P8 requesting R11 at time 3:212790000
+Master granting P8  request R11 at time 3:212790000
+Master has detected Process P10 requesting R15 at time 3:237990000
+Master granting P10  request R15 at time 3:237990000
+Master has detected Process P11 requesting R1 at time 3:263190000
+Master putting P11 in wait for R1 at time 3:263190000
+Master has detected Process P12 requesting R10 at time 3:288740000
+Master granting P12  request R10 at time 3:288740000
+Master has detected Process P13 requesting R10 at time 3:315060000
+Master granting P13  request R10 at time 3:315060000
+Master has detected Process P15 requesting R13 at time 3:342500000
+Master granting P15  request R13 at time 3:342500000
+Master has detected Process P17 requesting R8 at time 3:370640000
+Master granting P17  request R8 at time 3:370640000
+Master has detected Process P0 requesting R7 at time 3:398780000
+Master granting P0  request R7 at time 3:398780000
+Master releasing P1, Resources are:  
+Master has detected Process P8 requesting R4 at time 3:451070000
+Master granting P8  request R4 at time 3:451070000
+Master has detected Process P10 requesting R13 at time 3:485370000
+Master putting P10 in wait for R13 at time 3:485370000
+Master has detected Process P11 requesting R0 at time 4:10000
+Master granting P11  request R0 at time 4:10000
+Master terminating P11 at 4:10000
+Master releasing P11, Resources are: R0:3 R6:2 R12:1 R13:1 R16:1 
+Master has detected Process P12 requesting R15 at time 4:31440000
+Master putting P12 in wait for R15 at time 4:31440000
+Master terminating P12 at 4:31440000
+Master releasing P12, Resources are: R8:5 R10:5 
+Master has detected Process P13 requesting R6 at time 4:57550000
+Master granting P13  request R6 at time 4:57550000
+Master has detected Process P15 requesting R13 at time 4:84150000
+Master putting P15 in wait for R13 at time 4:84150000
+Master has detected Process P17 requesting R13 at time 4:110050000
+Master putting P17 in wait for R13 at time 4:110050000
+
+Current system resources
+Master running deadlock detection at time 4:110050000
+	Process P10, P12, P15, P17, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P10
+			Master running deadlock detection after P10 killed
+	Processes P12, P15, P17, deadlocked
+	Master granting P12 request R15 at time 4:110050000
+	Killing process P15
+			Master running deadlock detection after P15 killed
+	Processes P17, deadlocked
+	Master granting P17 request R13 at time 4:110050000
+System is no longer in deadlock
+
+Master has detected Process P0 requesting R2 at time 4:135670000
+Master granting P0  request R2 at time 4:135670000
+Master has detected Process P1 requesting R14 at time 4:160730000
+Master granting P1  request R14 at time 4:160730000
+Master has detected Process P8 requesting R14 at time 4:185860000
+Master granting P8  request R14 at time 4:185860000
+Master has detected Process P10 requesting R12 at time 4:211690000
+Master granting P10  request R12 at time 4:211690000
+Master has detected Process P13 requesting R10 at time 4:237310000
+Master granting P13  request R10 at time 4:237310000
+Master has detected Process P15 requesting R0 at time 4:262580000
+Master granting P15  request R0 at time 4:262580000
+
+
+Current Resource Table
+   R1  R2  R3  R4  R5  R6  R7  R8  R9  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  R20  
+P0   0   0   9   0   5   5   0   8   0   0   0   0   0   0   0   0   0   0   0   0   
+P1   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0   
+P8   0   0   0   0   6   0   0   0   0   0   0   5   0   0   6   0   0   0   0   0   
+P10   0   0   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0   0   0   
+P13   0   7   0   0   0   0   10   0   0   0   7   0   0   0   8   0   0   10   0   0   
+P15   6   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P17   0   0   0   0   0   0   0   0   4   0   0   0   0   6   0   0   0   0   0   0   
+
+Master has detected Process P17 requesting R3 at time 4:286940000
+Master granting P17  request R3 at time 4:286940000
+Master has detected Process P0 requesting R16 at time 4:312140000
+Master granting P0  request R16 at time 4:312140000
+Master has detected Process P1 requesting R1 at time 4:338180000
+Master putting P1 in wait for R1 at time 4:338180000
+Master has detected Process P8 requesting R18 at time 4:363100000
+Master granting P8  request R18 at time 4:363100000
+Master has detected Process P10 requesting R2 at time 4:388230000
+Master putting P10 in wait for R2 at time 4:388230000
+Master terminating P10 at 4:388230000
+Master releasing P10, Resources are: R12:2 
+Master has detected Process P13 requesting R7 at time 4:415250000
+Master putting P13 in wait for R7 at time 4:415250000
+Master terminating P13 at 4:415250000
+Master releasing P13, Resources are: R1:7 R6:10 R10:7 R14:8 R17:10 
+Master has detected Process P15 requesting R16 at time 4:439890000
+Master putting P15 in wait for R16 at time 4:439890000
+Master has detected Process P17 requesting R11 at time 4:466700000
+Master putting P17 in wait for R11 at time 4:466700000
+Master has detected Process P0 requesting R4 at time 5:30000
+Master granting P0  request R4 at time 5:30000
+Master has detected Process P1 requesting R9 at time 5:29360000
+Master granting P1  request R9 at time 5:29360000
+Master has detected Process P8 requesting R10 at time 5:55610000
+Master granting P8  request R10 at time 5:55610000
+Master has detected Process P15 requesting R18 at time 5:82350000
+Master granting P15  request R18 at time 5:82350000
+Master has detected Process P17 requesting R14 at time 5:107760000
+Master granting P17  request R14 at time 5:107760000
+Master terminating P17 at 5:107760000
+Master releasing P17, Resources are: R3:8 R8:4 R13:6 R14:4 
+Master has detected Process P0 requesting R17 at time 5:132820000
+Master granting P0  request R17 at time 5:132820000
+Master releasing P1, Resources are: R9:8 R14:2 
+Master has detected Process P8 requesting R1 at time 5:188540000
+Master granting P8  request R1 at time 5:188540000
+Master terminating P8 at 5:188540000
+Master releasing P8, Resources are: R1:9 R4:6 R10:3 R11:5 R14:6 R18:3 
+Master has detected Process P15 requesting R6 at time 5:215280000
+Master granting P15  request R6 at time 5:215280000
+Master has detected Process P0 requesting R3 at time 5:241530000
+Master granting P0  request R3 at time 5:241530000
+Master has detected Process P0 requesting R11 at time 5:267360000
+Master granting P0  request R11 at time 5:267360000
+Master has detected Process P1 requesting R15 at time 5:294870000
+Master granting P1  request R15 at time 5:294870000
+Master releasing P15, Resources are: R0:6 R6:9 R18:6 
+Master has detected Process P0 requesting R17 at time 5:347300000
+Master granting P0  request R17 at time 5:347300000
+Master has detected Process P0 requesting R7 at time 5:374670000
+Master putting P0 in wait for R7 at time 5:374670000
+Master has detected Process P1 requesting R7 at time 5:400080000
+Master putting P1 in wait for R7 at time 5:400080000
+Master has detected Process P15 requesting R10 at time 5:425000000
+Master granting P15  request R10 at time 5:425000000
+Master has detected Process P0 requesting R10 at time 5:450760000
+Master granting P0  request R10 at time 5:450760000
+
+Current system resources
+Master running deadlock detection at time 5:450760000
+	Process P0, P1, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P0
+			Master running deadlock detection after P0 killed
+	Processes P1, deadlocked
+	Killing process P1
+		System is no longer in deadlock
+
+Master has detected Process P0 requesting R18 at time 5:476310000
+Master granting P0  request R18 at time 5:476310000
+Master has detected Process P1 requesting R6 at time 6:50000
+Master granting P1  request R6 at time 6:50000
+Master has detected Process P15 requesting R17 at time 6:30780000
+Master granting P15  request R17 at time 6:30780000
+
+
+Current Resource Table
+   R1  R2  R3  R4  R5  R6  R7  R8  R9  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  R20  
+P0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   2   0   
+P1   0   0   0   0   0   0   10   0   0   0   0   0   0   0   0   0   0   0   0   0   
+P15   0   0   0   0   0   0   0   0   0   0   2   0   0   0   0   0   0   3   0   0   
+
+Master has detected Process P0 requesting R18 at time 6:56400000
+Master granting P0  request R18 at time 6:56400000
+Master has detected Process P0 requesting R14 at time 6:81320000
+Master granting P0  request R14 at time 6:81320000
+Master has detected Process P1 requesting R17 at time 6:107780000
+Master granting P1  request R17 at time 6:107780000
+Master has detected Process P15 requesting R11 at time 6:133470000
+Master granting P15  request R11 at time 6:133470000
+Master has detected Process P0 requesting R0 at time 6:158810000
+Master granting P0  request R0 at time 6:158810000
+Master has detected Process P0 requesting R3 at time 6:184710000
+Master granting P0  request R3 at time 6:184710000
+Master has detected Process P1 requesting R3 at time 6:210260000
+Master granting P1  request R3 at time 6:210260000
+Master has detected Process P15 requesting R14 at time 6:235460000
+Master granting P15  request R14 at time 6:235460000
+Master has detected Process P0 requesting R4 at time 6:260660000
+Master granting P0  request R4 at time 6:260660000
+Master has detected Process P0 requesting R5 at time 6:286560000
+Master granting P0  request R5 at time 6:286560000
+Master has detected Process P1 requesting R2 at time 6:312670000
+Master granting P1  request R2 at time 6:312670000
+Master has detected Process P15 requesting R15 at time 6:338360000
+Master granting P15  request R15 at time 6:338360000
+Master has detected Process P0 requesting R14 at time 6:364540000
+Master granting P0  request R14 at time 6:364540000
+Master has detected Process P0 requesting R12 at time 6:391910000
+Master granting P0  request R12 at time 6:391910000
+Master has detected Process P1 requesting R18 at time 6:418370000
+Master granting P1  request R18 at time 6:418370000
+Master has detected Process P15 requesting R11 at time 6:444970000
+Master putting P15 in wait for R11 at time 6:444970000
+Master has detected Process P0 requesting R9 at time 6:474160000
+Master granting P0  request R9 at time 6:474160000
+
+Current system resources
+Master running deadlock detection at time 6:474160000
+	Process P15, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P15
+		System is no longer in deadlock
+
+Master has detected Process P0 requesting R12 at time 7:0
+Master putting P0 in wait for R12 at time 7:0
+Master has detected Process P1 requesting R1 at time 7:49630000
+Master granting P1  request R1 at time 7:49630000
+Master has detected Process P15 requesting R16 at time 7:90930000
+Master granting P15  request R16 at time 7:90930000
+Master terminating P15 at 7:90930000
+Master releasing P15, Resources are: R16:4 
+Master has detected Process P0 requesting R18 at time 7:128870000
+Master putting P0 in wait for R18 at time 7:128870000
+
+Current system resources
+Master running deadlock detection at time 7:128870000
+	Process P0, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P0
+		System is no longer in deadlock
+
+Master has detected Process P0 requesting R14 at time 7:164360000
+Master granting P0  request R14 at time 7:164360000
+Master has detected Process P1 requesting R2 at time 7:198870000
+Master putting P1 in wait for R2 at time 7:198870000
+Master has detected Process P0 requesting R16 at time 7:265790000
+Master granting P0  request R16 at time 7:265790000
+
+
+Current Resource Table
+   R1  R2  R3  R4  R5  R6  R7  R8  R9  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  R20  
+P0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   9   0   1   0   0   0   
+P1   0   1   10   2   0   0   10   0   0   0   0   0   0   0   0   0   0   1   10   0   
+
+Master has detected Process P0 requesting R3 at time 7:301350000
+Master granting P0  request R3 at time 7:301350000
+Master has detected Process P1 requesting R3 at time 7:335930000
+Master granting P1  request R3 at time 7:335930000
+Master has detected Process P0 requesting R1 at time 7:369740000
+Master granting P0  request R1 at time 7:369740000
+Master has detected Process P0 requesting R11 at time 7:405790000
+Master granting P0  request R11 at time 7:405790000
+Master has detected Process P1 requesting R5 at time 7:440020000
+Master granting P1  request R5 at time 7:440020000
+Master has detected Process P0 requesting R12 at time 7:475930000
+Master granting P0  request R12 at time 7:475930000
+Master has detected Process P0 requesting R2 at time 8:20000
+Master putting P0 in wait for R2 at time 8:20000
+Master terminating P0 at 8:20000
+Master releasing P0, Resources are: R1:1 R3:4 R11:8 R12:6 R14:9 R16:1 
+Master has detected Process P1 requesting R1 at time 8:43840000
+Master granting P1  request R1 at time 8:43840000
+Master releasing P0, Resources are:  
+
+Current system resources
+Master running deadlock detection at time 8:77650000
+	Process P0, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P0
+		System is no longer in deadlock
+
+Master has detected Process P1 requesting R5 at time 8:113980000
+Master putting P1 in wait for R5 at time 8:113980000
+Master has detected Process P0 requesting R8 at time 8:148840000
+Master granting P0  request R8 at time 8:148840000
+Master terminating P0 at 8:148840000
+Master releasing P0, Resources are: R8:4 
+Master has detected Process P1 requesting R12 at time 8:187340000
+Master granting P1  request R12 at time 8:187340000
+Master has detected Process P0 requesting R1 at time 8:224230000
+Master putting P0 in wait for R1 at time 8:224230000
+Master releasing P1, Resources are: R1:10 R2:10 R3:7 R5:9 R6:10 R12:4 R17:1 R18:10 
+Master has detected Process P0 requesting R1 at time 8:295070000
+Master granting P0  request R1 at time 8:295070000
+Master has detected Process P1 requesting R7 at time 8:332310000
+Master granting P1  request R7 at time 8:332310000
+Master has detected Process P0 requesting R5 at time 8:368290000
+Master granting P0  request R5 at time 8:368290000
+Master has detected Process P1 requesting R13 at time 8:403080000
+Master granting P1  request R13 at time 8:403080000
+Master has detected Process P0 requesting R13 at time 8:437450000
+Master granting P0  request R13 at time 8:437450000
+Master has detected Process P1 requesting R16 at time 8:474130000
+Master granting P1  request R16 at time 8:474130000
+Master has detected Process P0 requesting R2 at time 9:40000
+Master granting P0  request R2 at time 9:40000
+Master has detected Process P1 requesting R4 at time 9:42740000
+Master granting P1  request R4 at time 9:42740000
+Master has detected Process P0 requesting R9 at time 9:79840000
+Master granting P0  request R9 at time 9:79840000
+Master has detected Process P1 requesting R1 at time 9:113930000
+Master putting P1 in wait for R1 at time 9:113930000
+Master has detected Process P0 requesting R11 at time 9:148650000
+Master granting P0  request R11 at time 9:148650000
+
+Current system resources
+Master running deadlock detection at time 9:148650000
+	Process P1, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P1
+		System is no longer in deadlock
+
+Master has detected Process P1 requesting R3 at time 9:183160000
+Master granting P1  request R3 at time 9:183160000
+
+
+Current Resource Table
+   R1  R2  R3  R4  R5  R6  R7  R8  R9  R10  R11  R12  R13  R14  R15  R16  R17  R18  R19  R20  
+P1   0   0   0   7   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   0   
+
+Master has detected Process P0 requesting R2 at time 9:219980000
+Master putting P0 in wait for R2 at time 9:219980000
+Master has detected Process P1 requesting R10 at time 9:251970000
+Master granting P1  request R10 at time 9:251970000
+Master has detected Process P0 requesting R7 at time 9:283960000
+Master granting P0  request R7 at time 9:283960000
+Master has detected Process P1 requesting R1 at time 9:314130000
+Master putting P1 in wait for R1 at time 9:314130000
+Master has detected Process P0 requesting R17 at time 9:350180000
+Master granting P0  request R17 at time 9:350180000
+Master has detected Process P1 requesting R18 at time 9:385810000
+Master granting P1  request R18 at time 9:385810000
+Master has detected Process P0 requesting R0 at time 9:420320000
+Master granting P0  request R0 at time 9:420320000
+Master has detected Process P1 requesting R1 at time 9:456300000
+Master putting P1 in wait for R1 at time 9:456300000
+Master has detected Process P0 requesting R0 at time 9:490600000
+Master granting P0  request R0 at time 9:490600000
+Master has detected Process P1 requesting R14 at time 10:60000
+Master granting P1  request R14 at time 10:60000
+Master has detected Process P0 requesting R17 at time 10:43180000
+Master granting P0  request R17 at time 10:43180000
+Master has detected Process P1 requesting R13 at time 10:78950000
+Master granting P1  request R13 at time 10:78950000
+Master has detected Process P0 requesting R2 at time 10:112130000
+Master putting P0 in wait for R2 at time 10:112130000
+
+Current system resources
+Master running deadlock detection at time 10:112130000
+	Process P0, deadlocked
+	Attempting to resolve deadlock...
+	Killing process P0
+		System is no longer in deadlock
+
+Master has detected Process P1 requesting R11 at time 10:148250000
+Master granting P1  request R11 at time 10:148250000
+Master has detected Process P0 requesting R12 at time 10:184860000
+Master granting P0  request R12 at time 10:184860000
+Master has detected Process P1 requesting R17 at time 10:218950000
+Master granting P1  request R17 at time 10:218950000
+Master terminating P1 at 10:218950000
+Master releasing P1, Resources are: R3:7 R10:7 R11:9 R13:1 R14:6 R17:8 R18:1 
+
+Total Number of request granted = 132
+Total processes terminated in deadlock algo = 18
+Total processes terminated normally = 19
+Total times deadlock algo ran = 10
+Percent of process terminated in a deadlock on average = 0

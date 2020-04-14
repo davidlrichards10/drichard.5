@@ -1,1 +1,50 @@
-
+====================================================Homework 5 README==================================================
+        Date:   March 29, 2020
+        Author: David Richards
+        Class:  CS4760
+=======================================================================================================================
+Invocation: ./oss [-h] [-i x -v x -t x]
+=======================================================================================================================
+How to Run:
+                1. Type make
+                2. Run the executable by typing ./oss [-h] [-i x -v x -t x]
+                3. ./oss alone will run with the following default ./oss -i log -t 10
+                4. Default files names (File holding run logs ("log"))
+                5. -h   = describe how the project should be run and then terminate
+                   -i   = specify the output file that information will be written to (default is "log")
+		   -v   = indicate whether you want verbose on/off (type -v 1 for on and nothing for off) (Default off)
+			Verbose on = log requested/granted/released resources, when a deadlock is detected and how
+				     it is resolved, and resource table
+			Verbose off = only log when a deadlock is detected and how it is resolved
+                   -t   = specify the timer you want the program to run for(sigerror if runtime exceeds this)
+			  deafult of (10). 10 seconds has been plenty of time when I have ran it.
+		6. Type make clean to remove (oss.o and user.o) + executables (oss and user)
+=======================================================================================================================
+Files included:
+                1. oss.c = Main driver file used for most operations
+                2. user.c = Child processes file that oss communicates with via flags and shared memory
+                3. shared.h = Contains the structs and information for shared memory
+=======================================================================================================================
+Version Control: (logging technique used)
+                1. My log files are included in /classes/OS/drichard/drichard.5/log.txt
+=======================================================================================================================
+Comments on submission: All project requirments met I believe
+		1. Statistics are always printed to the end of the file as well as the screen no matter if verbose is
+		   on or off
+		2. In verbose "on" mode a resource table is printed every 20 granted resources showing the current
+		   resources allocated at that time
+		3. I used flags that reside in shared memory to communicate between user.c and oss.c to indicate the 
+		   operation that needs to take place (release, request or terminate)
+		4. The deadlock detection function runs ~every second
+		5. My program runs until all the processes terminate normally. I did not see a direct specification
+		   for when the program should end so I did this similar to the last project
+		6. My prgram will always finish successfully but will stop writing to the output file if the lines in
+		   in the fil exceed 10,000 lines. Although my program does not get close to 10,000 
+=======================================================================================================================
+Deadlock resolution:
+		1. The deadlock function checks the blocked queue which contains processes that were denied a resource 
+		   during normal run. The processes are killed 1 by 1 until the deadlock is gone. The only way they
+  		   wont be killed in the deadlock resolution is if for example: P1 and P2 are deadlocked. P2 needs R1
+		   and P1 gets killed releasing R1 so instead of terminating, P2 is granted resource R1 because it is
+		   now available. Whichever process is blocked first gets killed in the deadlock resolution first
+=======================================================================================================================
