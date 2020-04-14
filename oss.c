@@ -1,3 +1,9 @@
+/* Author: David Richards
+ * Date: Tue April 14th
+ * Assignment: CS4760 hw5
+ * File: oss.c
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -14,10 +20,12 @@
 #include <time.h>
 #include "shared.h"
 
+/* for shared memory setup/semaphore */
 int shmid; 
-SharedMemory* ptr;
+sm* ptr;
 sem_t *sem;
 
+/* keep track of statistics */
 int requestGranted = 0;
 int deadlockTermination = 0;
 int normalTermination = 0;
@@ -49,11 +57,13 @@ int granted = 0;
 int verbose = 0;
 int lineCounter = 0;
 
+/* default output file */
 char outputFileName[] = "log";
 FILE* fp;
 
 int main(int argc, char* argv[]) 
 {
+	/* getopt to parse command line options */
 	int c;
 	while((c=getopt(argc, argv, "v:i:t:h"))!= EOF)
 	{
@@ -82,6 +92,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
+	/* print verbose option to the screen */
 	if (verbose == 1)
 	{
 		printf("Verbose ON\n");
@@ -97,14 +108,17 @@ int main(int argc, char* argv[])
 	srand(time(NULL));
 	int count = 0;	
 
-	if ((shmid = shmget(9784, sizeof(SharedMemory), IPC_CREAT | 0600)) < 0) 
+	/* setup shared memory segment */
+	if ((shmid = shmget(9784, sizeof(sm), IPC_CREAT | 0600)) < 0) 
 	{
         	perror("Error: shmget");
         	exit(errno);
 	}
 
+	/* open semaphore to protect the clock */
 	sem = sem_open("p5sem", O_CREAT, 0777, 1);	
   
+	/* attach shared memory */
 	ptr = shmat(shmid, NULL, 0);
 
 	pid_t cpid;
@@ -115,18 +129,23 @@ int main(int argc, char* argv[])
 	srand((unsigned) time(&t));
 	int totalCount = 0;
 
+	/* setup max number of available resources */
 	int i = 0;
 	for(i=0; i <20; i++)
 	{
 		ptr->resourceStruct.max[i] = rand() % (10 + 1 - 1) + 1;
 	}
-	for(i=0; i < 4; i++){
+	/* make about 20% shared resources */
+	for(i=0; i < 4; i++)
+	{
 		sharedResources[i] = rand() % (19 + 0 - 0) + 0;
 	}
+	/* available resources is equal to the max available */
 	for(i=0; i <20; i++)
 	{
 		ptr->resourceStruct.available[i] = ptr->resourceStruct.max[i];
 	}
+	/* initialize allocated array */
 	int j = 0;
 	for(j=0; j < 18; j++) 
 	{
@@ -136,10 +155,12 @@ int main(int argc, char* argv[])
 		}
 
 	}
+	/* no porcesses start out blocked */
 	for(i = 0; i <20; i++)
 	{
 		blockedQueue[i] = -1;
-	}		
+	}
+	/* all processes start out as active when spawned */		
 	for(i = 0; i < 18; i++)
 	{
 		stillActive[i] = i;
@@ -151,16 +172,17 @@ int main(int argc, char* argv[])
                 exit(0);
         }
 
-        if (signal(SIGALRM, sigErrors) == SIG_ERR) //sigerror on program exceeding 3 second alarm
+        if (signal(SIGALRM, sigErrors) == SIG_ERR) //sigerror on program exceeding specified second alarm
         {
                 exit(0);
         }
 
 	struct time randFork;
-	//struct time deadLockCheck;
-	//deadLockCheck.seconds = 1;
-	
+
+	/* start alarm based on user specification */
 	alarm(timer);
+
+	/* run for a max of 100 processes or no process are remaining alive */
 	while(totalCount < maxPro || count > 0)
 	{ 							
 		
@@ -169,18 +191,23 @@ int main(int argc, char* argv[])
 				count--;
 			}
 
+			/* increment the clock by 70,000 per turn and by the initial fork */
 			incClock(&ptr->time,0,70000);
 			int nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
 			incClock(&randFork,0,nextFork);
 			
+			/* run as long as there are less that 18 processes running at once */
 			if(count < 18 && ptr->time.nanoseconds < nextFork) 
 			{
+						/* next fork gets changed each run through this loop */
 						sem_wait(sem);
 						randFork.seconds = ptr->time.seconds;
 						randFork.nanoseconds = ptr->time.nanoseconds;
 						sem_post(sem);
 						nextFork = (rand() % (500000000 - 1000000 + 1)) + 1000000;
-						incClock(&randFork,0,nextFork);			
+						incClock(&randFork,0,nextFork);
+			
+						/* run until all processes terminate normally */
 						int l;
         					for(l=0; l<18;l++)
 						{
@@ -190,6 +217,7 @@ int main(int argc, char* argv[])
                 					}
         					}
 
+						/* exit and detach shared memory once all process terminate */
         					if(termed == 18)
 						{	
 							detach();
@@ -226,6 +254,7 @@ int main(int argc, char* argv[])
 
                 				}
 	
+						/* fork/exec over to user.c to find out next action */
 						cpid=fork();
 
 						totalCount++;
@@ -239,6 +268,7 @@ int main(int argc, char* argv[])
 							exit(0);
 						}
 
+						/* if oss recieves that the process is requesting, check if that resource is available and grant, otherwise block it*/
 						if(ptr->resourceStruct.requestF == 1)
 						{
 							ptr->resourceStruct.requestF = 0;
@@ -291,6 +321,7 @@ int main(int argc, char* argv[])
 								}
 								requestGranted++;
 								granted++;
+								/* print current resource table after each 20 granted resources */
 								if( granted == 20  && verbose == 1 && lineCounter < 10000)
 								{
 									fprintf(fp,"\n\nCurrent Resource Table\n");
@@ -325,6 +356,7 @@ int main(int argc, char* argv[])
 
 						}
 
+						/* if a process decides to terminate update stillActive array and release allocated resources */
 						if(ptr->resourceStruct.termF == 1)
 						{
 							//deadLockCheck.seconds++;
@@ -340,6 +372,7 @@ int main(int argc, char* argv[])
 							release(pid,0);
 						}
 
+						/* if a process decides to release, then release all resources allocated to it */
 						if(ptr->resourceStruct.releaseF == 1)
 						{
 							ptr->resourceStruct.releaseF = 0;
@@ -356,6 +389,7 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+/* function to print run statistics to screen and file */
 void printStats()
 {
 	fprintf(fp,"\nTotal Number of request granted = %d\n", requestGranted);
@@ -371,6 +405,7 @@ void printStats()
 	printf("Percent of process terminated in a deadlock on average = %.3f%\n\n", (average / numDeadlockRan) * 100);
 }
 
+/* check blocked queue for processes and run the deadlock algorithm every second */
 void rundeadlock()
 {
 	if(pidNum < 17)
@@ -388,16 +423,13 @@ void rundeadlock()
 				w++;
 			}
 		}
-	//printf("%d\n",ptr->time.seconds);
-	//if(ptr->time.seconds == deadLockCheck)
-	//{
 		if(w > 0 &&  ptr->time.seconds == deadLockCheck)
 		{
 			deadLockCheck++;
 			deadlockAlgo();
 			numDeadlockRan++;
 		}
-	//}
+
 		pidNum = 0;		
 							
 		int i = 0;
@@ -410,6 +442,7 @@ void rundeadlock()
 	}	
 }
 
+/* function to increment the clock and protect via semaphore */
 void incClock(struct time* time, int sec, int ns)
 {
 	sem_wait(sem);
@@ -424,6 +457,7 @@ void incClock(struct time* time, int sec, int ns)
 	sem_post(sem);
 }
 
+/* detach shared memory and semaphore */
 void detach()
 {
 	shmctl(shmid, IPC_RMID, NULL);	
@@ -450,6 +484,7 @@ void sigErrors(int signum)
         exit(0);
 }
 
+/* function to release allocated resources if the process decides to release */
 void release(int pid, int dl)
 {
 	int i = 0, j = 0;
@@ -508,6 +543,7 @@ void release(int pid, int dl)
 	}
 }
 
+/* inside the deadlock algorithm, release reources once the process is killed */
 void releasedl(int pid, int dl)
 {
         int i = 0, j = 0;
@@ -566,11 +602,13 @@ void releasedl(int pid, int dl)
         }
 }
 
+/* function to resolve deadlock by terminating processes */
 void deadlockAlgo() 
 {
 	fprintf(fp,"\nCurrent system resources\n");
 	fprintf(fp,"Master running deadlock detection at time %d:%d\n", ptr->time.seconds,ptr->time.nanoseconds);
 	int i = 0;
+	/* keep track of how many have been terminated, and average statistic */
 	float blockCount = 0;	
 	float terminated = 0;
 	float averageDL = 0;
@@ -591,16 +629,13 @@ void deadlockAlgo()
 	fprintf(fp,"deadlocked\n");
 	fprintf(fp,"	Attempting to resolve deadlock...\n");
 	
+	/* resolve deadlock by killing processes or granting resources if they become available within the algorithm */
 	for(i =0; i < blockCount; i++)
 	{	
 		if(ptr->resourceStruct.available[resourceIndexQueue[i]] <= ptr->descriptor[blockedQueue[i]].request[resourceIndexQueue[i]] )
 		{
-			//terminated++;
-			//average+=terminated;
 			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
-			//stillActive[i] = -1;
-			//ptr->resourceStruct.termF == 1;
 			deadlockTermination++;
 			releasedl(blockedQueue[i],1);		
 			
@@ -620,18 +655,21 @@ void deadlockAlgo()
 		} 
 		else 
 		{
-			//grant++;
 			allocated(blockedQueue[i], resourceIndexQueue[i]);
 			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",blockedQueue[i], resourceIndexQueue[i], ptr->time.seconds,ptr->time.nanoseconds);
 
 		}
 	}	
+	/* kill all deadlocked processes until deadlock is resolved */
 	fprintf(fp,"System is no longer in deadlock\n");
 	fprintf(fp,"\n");
+
+	/* keep track of the average statistic */
 	averageDL = terminated / blockCount;
 	average += averageDL; 
 }
 
+/* function to see if resources are available */
 int checkBlocked(int pid, int resourceIndex) 
 {
 	if(ptr->resourceStruct.available[resourceIndex] > 0)
@@ -644,7 +682,7 @@ int checkBlocked(int pid, int resourceIndex)
 	}
 }
 
-
+/* specify which resources are allocated and can ignore shared resources */
 void allocated(int pid, int resourceIndex) 
 {
 	if(resourceIndex == sharedResources[0] || resourceIndex == sharedResources[1] || resourceIndex == sharedResources[2] || resourceIndex == sharedResources[3])

@@ -1,3 +1,9 @@
+/* Author: David Richards
+ * Date: Tue April 14th
+ * Assignment: CS4760 hw5
+ * File: shared.h
+ */
+
 #ifndef SHARED_H
 #define SHARED_H
 
@@ -20,10 +26,10 @@ typedef struct {
 	int index;
 } resourceInfo;
 
-typedef struct shared_memory_object {
+typedef struct shmStruct {
     	resourceDescriptor descriptor[18 + 1];
 	resourceInfo resourceStruct;
 	struct time time;
-} SharedMemory; 
+} sm; 
 
 #endif
