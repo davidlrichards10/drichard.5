@@ -23,6 +23,7 @@ int deadlockTermination = 0;
 int normalTermination = 0;
 int numDeadlockRan = 0;
 int deadLockCheck = 1;
+int average = 0;
 
 int sharedResources[4];
 int blockedQueue[20];
@@ -353,11 +354,13 @@ void printStats()
 	fprintf(fp,"Total processes terminated in deadlock algo = %d\n", deadlockTermination);	
 	fprintf(fp,"Total processes terminated normally = %d\n", normalTermination);
 	fprintf(fp,"Total times deadlock algo ran = %d\n", numDeadlockRan);
+	fprintf(fp,"Percent of process terminated in a deadlock on average = %d\n",average);
 
 	printf("\nTotal Number of request granted = %d\n", requestGranted);
         printf("Total processes terminated in deadlock algo = %d\n", deadlockTermination);
         printf("Total processes terminated normally = %d\n", normalTermination);
         printf("Total times deadlock algo ran = %d\n", numDeadlockRan);
+	printf("Percent of process terminated in a deadlock on average = %d\n", average); /// numDeadlockRan);
 }
 
 void rundeadlock()
@@ -377,7 +380,7 @@ void rundeadlock()
 				w++;
 			}
 		}
-	printf("%d\n",ptr->time.seconds);
+	//printf("%d\n",ptr->time.seconds);
 	if(ptr->time.seconds == deadLockCheck)
 	{
 		if(w > 0) //|| ptr->time.seconds == deadLockCheck)
@@ -503,7 +506,9 @@ void deadlockAlgo()
 	fprintf(fp,"Master running deadlock detection at time %d:%d\n", ptr->time.seconds,ptr->time.nanoseconds);
 	int i = 0;
 	int blockCount = 0;	
-	
+	int terminated = 0;
+	int averageDL = 0;
+
 	for(i =0; i < 20; i++)
 	{
 		if(blockedQueue[i] != -1)
@@ -524,6 +529,8 @@ void deadlockAlgo()
 	{	
 		if(ptr->resourceStruct.available[resourceIndexQueue[i]] <= ptr->descriptor[blockedQueue[i]].request[resourceIndexQueue[i]] )
 		{
+			//terminated++;
+			//average+=terminated;
 			fprintf(fp,"	Killing process P%d\n", blockedQueue[i]);
 			fprintf(fp,"		");
 			deadlockTermination++;
@@ -533,6 +540,7 @@ void deadlockAlgo()
 			{
 				fprintf(fp,"	Master running deadlock detection after P%d killed\n",blockedQueue[i]);
 				fprintf(fp,"	Processes ");
+				terminated++;
 				int m;
 				for(m=i+1; m <blockCount; m++)
 				{
@@ -544,6 +552,7 @@ void deadlockAlgo()
 		} 
 		else 
 		{
+			//grant++;
 			allocated(blockedQueue[i], resourceIndexQueue[i]);
 			fprintf(fp,"	Master granting P%d request R%d at time %d:%d\n",blockedQueue[i], resourceIndexQueue[i], ptr->time.seconds,ptr->time.nanoseconds);
 
@@ -551,7 +560,8 @@ void deadlockAlgo()
 	}	
 	fprintf(fp,"System is no longer in deadlock\n");
 	fprintf(fp,"\n");
-	
+	averageDL = terminated / blockCount;
+	average += averageDL; 
 }
 
 int checkBlocked(int pid, int resourceIndex) 
