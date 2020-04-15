@@ -24,6 +24,7 @@
 int shmid; 
 sm* ptr;
 sem_t *sem;
+int deadlockCheck = 1;
 
 void incClock(struct time* time, int sec, int ns);
 
@@ -96,7 +97,9 @@ int main(int argc, char* argv[])
 
 		/* see if its time to check for termination */
 		if((ptr->time.seconds > termCheck.seconds) || (ptr->time.seconds == termCheck.seconds && ptr->time.nanoseconds >= termCheck.nanoseconds))
+		//if(ptr->time.seconds == 1)//deadlockCheck)
 		{
+			//deadlockCheck++;
 			/* set time for next termination check */
 			termination = (rand() % (250 * 1000000) + 1);
 			termCheck.seconds = ptr->time.seconds;

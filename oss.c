@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 		}
 
 	}
-	/* no porcesses start out blocked */
+	/* no processes start out blocked */
 	for(i = 0; i <20; i++)
 	{
 		blockedQueue[i] = -1;
@@ -337,8 +337,8 @@ int main(int argc, char* argv[])
 									fprintf(fp,"\n");
         								for(j =0; j <18; j++)
 									{
-										if(stillActive[j] != -1)
-										{
+										//if(stillActive[j] != -1)
+										//{
                 									p = j;
                         								fprintf(fp,"P%d   ",p);
                 								for(i = 0; i < 20; i++) 
@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
                                 							fprintf(fp,"%d   ", ptr->descriptor[p].allocated[i]);
                         							}
                         								fprintf(fp,"\n");
-        									}
+        									//}
 									}
 									fprintf(fp,"\n");	
 									lineCounter+=18;
@@ -395,7 +395,7 @@ void printStats()
 	fprintf(fp,"Total processes terminated in deadlock algo = %d\n", deadlockTermination);	
 	fprintf(fp,"Total processes terminated normally = %d\n", normalTermination);
 	fprintf(fp,"Total times deadlock algo ran = %d\n", numDeadlockRan);
-	fprintf(fp,"Percent of process terminated in a deadlock on average = %d\n",average);
+	fprintf(fp,"Percent of process terminated in a deadlock on average = %d\n", (average / numDeadlockRan) * 100);
 
 	printf("\nTotal Number of request granted = %d\n", requestGranted);
         printf("Total processes terminated in deadlock algo = %d\n", deadlockTermination);
@@ -422,7 +422,7 @@ void rundeadlock()
 				w++;
 			}
 		}
-		if(w > 0 &&  ptr->time.seconds == deadLockCheck)
+		if(w > 0 && ptr->time.seconds == deadLockCheck)
 		{
 			deadLockCheck++;
 			deadlockAlgo();
@@ -496,7 +496,7 @@ void release(int pid, int dl)
 	}
 		if(verbose == 1)
 		{
-			fprintf(fp,"Master releasing P%d, Resources are: ",pid);
+			fprintf(fp,"Master has acknowledged P%d releasing: ",pid);
 		}
 	for(i=0; i < 20; i++) 
 	{
@@ -514,15 +514,17 @@ void release(int pid, int dl)
 			numberRes++;
 		}
 	}
-	
 	if(numberRes == 20 && verbose == 1)
 	{
-		fprintf(fp," \n");
+		//fprintf(fp,"at time %d:%d", ptr->time.seconds,ptr->time.nanoseconds);
+		fprintf(fp," N/A ");
+		fprintf(fp,"at time %d:%d \n", ptr->time.seconds,ptr->time.nanoseconds);
 	} 
 	else 
 	{
 		if(verbose == 1)
 		{
+			fprintf(fp,"at time %d:%d", ptr->time.seconds,ptr->time.nanoseconds);
 			fprintf(fp,"\n");
 		}
 		int i;
@@ -553,16 +555,16 @@ void releasedl(int pid, int dl)
         {
                 validationArray[i] = 0;
         }
-                if(verbose == 0)
+                if(verbose == 0 || verbose == 1)
                 {
-                        fprintf(fp,"Master releasing P%d, Resources are: ",pid);
+                        fprintf(fp,"Resources released are as follows: ");
                 }
         for(i=0; i < 20; i++)
         {
                 if(ptr->descriptor[pid].allocated[i] > 0)
                 {
                         validationArray[i] = i;
-                        if(verbose == 0)
+                        if(verbose == 0 || verbose == 1)
                         {
                                 fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);
                         }
@@ -574,13 +576,13 @@ void releasedl(int pid, int dl)
                 }
         }
 
-        if(numberRes == 20 && verbose == 0)
+        if(numberRes == 20 && verbose == 0 || verbose == 1)
         {
-                fprintf(fp," \n");
+                fprintf(fp," N/A\n");
         }
         else
         {
-                if(verbose == 0)
+                if(verbose == 0 || verbose == 1)
                 {
                         fprintf(fp,"\n");
                 }
