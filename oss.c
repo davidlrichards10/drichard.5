@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
         								int j;
         								int i;
 									fprintf(fp,"   ");
-									for(j=1; j <= 20; j++)
+									for(j=0; j < 20; j++)
 									{
 										fprintf(fp,"R%d  ", j);
 									}
