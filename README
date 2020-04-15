@@ -22,8 +22,11 @@ How to Run:
 =======================================================================================================================
 Files included:
                 1. oss.c = Main driver file used for most operations
-                2. user.c = Child processes file that oss communicates with via flags and shared memory
-                3. shared.h = Contains the structs and information for shared memory
+                   user.c = Child processes file that oss communicates with via flags and shared memory
+                   shared.h = Contains the structs and information for shared memory
+		   README = "this"
+		   makefile = following suffix rules
+		   log = I included my most recent log in the project submission
 =======================================================================================================================
 Version Control: (logging technique used)
                 1. My log files are included in /classes/OS/drichard/drichard.5/log.txt
@@ -39,12 +42,16 @@ Comments on submission: All project requirments met I believe
 		5. My program runs until all the processes terminate normally. I did not see a direct specification
 		   for when the program should end so I did this similar to the last project
 		6. My prgram will always finish successfully but will stop writing to the output file if the lines in
-		   in the fil exceed 10,000 lines. Although my program does not get close to 10,000 
+		   in the file exceed 10,000 lines. Although my program does not get close to 10,000 
+		7. A couple of times during testing the deadlock algorithm will only run a couple or even 0 times due
+		   to the clock I believe. In the rare case that this were to happen just re-run it and everything 
+		   should work fine.
+		8. Sometimes, the first couple processes will terminate before they have run for at least 1 second
+		   but after that it seems to work fine.
 =======================================================================================================================
 Deadlock resolution:
 		1. The deadlock function checks the blocked queue which contains processes that were denied a resource 
 		   during normal run. The processes are killed 1 by 1 until the deadlock is gone. The only way they
-  		   wont be killed in the deadlock resolution is if for example: P1 and P2 are deadlocked. P2 needs R1
-		   and P1 gets killed releasing R1 so instead of terminating, P2 is granted resource R1 because it is
-		   now available. Whichever process is blocked first gets killed in the deadlock resolution first
+  		   wont be killed in the deadlock resolution is if that resource becomes available within the deadlock
+		   function. Resources become available after released.
 =======================================================================================================================

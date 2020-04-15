@@ -310,7 +310,8 @@ int main(int argc, char* argv[])
 
 								}
 								blockPtr++;					
-							} 
+							}
+							/* grant the request if the resource is available */ 
 							else 
 							{
 								allocated(pid, resourceIndex);
@@ -337,8 +338,6 @@ int main(int argc, char* argv[])
 									fprintf(fp,"\n");
         								for(j =0; j <18; j++)
 									{
-										//if(stillActive[j] != -1)
-										//{
                 									p = j;
                         								fprintf(fp,"P%d   ",p);
                 								for(i = 0; i < 20; i++) 
@@ -346,7 +345,6 @@ int main(int argc, char* argv[])
                                 							fprintf(fp,"%d   ", ptr->descriptor[p].allocated[i]);
                         							}
                         								fprintf(fp,"\n");
-        									//}
 									}
 									fprintf(fp,"\n");	
 									lineCounter+=18;
@@ -358,7 +356,6 @@ int main(int argc, char* argv[])
 						/* if a process decides to terminate update stillActive array and release allocated resources */
 						if(ptr->resourceStruct.termF == 1)
 						{
-							//deadLockCheck.seconds++;
 							ptr->resourceStruct.termF = 0;
 							if(verbose == 1 && lineCounter < 10000)
 							{
@@ -395,7 +392,7 @@ void printStats()
 	fprintf(fp,"Total processes terminated in deadlock algo = %d\n", deadlockTermination);	
 	fprintf(fp,"Total processes terminated normally = %d\n", normalTermination);
 	fprintf(fp,"Total times deadlock algo ran = %d\n", numDeadlockRan);
-	fprintf(fp,"Percent of process terminated in a deadlock on average = %d\n", (average / numDeadlockRan) * 100);
+	fprintf(fp,"Percent of process terminated in a deadlock on average = %.3f%\n", (average / numDeadlockRan) * 100);
 
 	printf("\nTotal Number of request granted = %d\n", requestGranted);
         printf("Total processes terminated in deadlock algo = %d\n", deadlockTermination);
@@ -422,6 +419,7 @@ void rundeadlock()
 				w++;
 			}
 		}
+		/* run deadlock detection every second and if there exixts a block */
 		if(w > 0 && ptr->time.seconds == deadLockCheck)
 		{
 			deadLockCheck++;
@@ -430,7 +428,8 @@ void rundeadlock()
 		}
 
 		pidNum = 0;		
-							
+		
+		/* reinitialize blocked queue meaning no processes are blocked */					
 		int i = 0;
 		for(i = 0; i <20; i++)
 		{
@@ -487,22 +486,18 @@ void sigErrors(int signum)
 void release(int pid, int dl)
 {
 	int i = 0, j = 0;
-	int validationArray[20];
 	int numberRes = 0;
 	
-	for(i=0; i < 20; i++) 
+	if(verbose == 1)
 	{
-		validationArray[i] = 0;	
+		fprintf(fp,"Master has acknowledged P%d releasing: ",pid);
 	}
-		if(verbose == 1)
-		{
-			fprintf(fp,"Master has acknowledged P%d releasing: ",pid);
-		}
+
+	/* print resources allocated to process */
 	for(i=0; i < 20; i++) 
 	{
 		if(ptr->descriptor[pid].allocated[i] > 0)
 		{		
-			validationArray[i] = i;
 			if(verbose == 1)
 			{
 				fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);	
@@ -514,12 +509,13 @@ void release(int pid, int dl)
 			numberRes++;
 		}
 	}
+	/* if no resources are allocated */
 	if(numberRes == 20 && verbose == 1)
 	{
-		//fprintf(fp,"at time %d:%d", ptr->time.seconds,ptr->time.nanoseconds);
 		fprintf(fp," N/A ");
 		fprintf(fp,"at time %d:%d \n", ptr->time.seconds,ptr->time.nanoseconds);
-	} 
+	}
+	/* make the resources released available again */ 
 	else 
 	{
 		if(verbose == 1)
@@ -548,22 +544,17 @@ void release(int pid, int dl)
 void releasedl(int pid, int dl)
 {
         int i = 0, j = 0;
-        int validationArray[20];
-        int numberRes = 0;
+       	int numberRes = 0;
 
-        for(i=0; i < 20; i++)
+        if(verbose == 0 || verbose == 1)
         {
-                validationArray[i] = 0;
+        	fprintf(fp,"Resources released are as follows: ");
         }
-                if(verbose == 0 || verbose == 1)
-                {
-                        fprintf(fp,"Resources released are as follows: ");
-                }
+	/* print resources that process is releasing */
         for(i=0; i < 20; i++)
         {
                 if(ptr->descriptor[pid].allocated[i] > 0)
                 {
-                        validationArray[i] = i;
                         if(verbose == 0 || verbose == 1)
                         {
                                 fprintf(fp,"R%d:%d ",i, ptr->descriptor[pid].allocated[i]);
@@ -576,10 +567,11 @@ void releasedl(int pid, int dl)
                 }
         }
 
-        if(numberRes == 20 && verbose == 0 || verbose == 1)
+        if(numberRes == 20)
         {
                 fprintf(fp," N/A\n");
         }
+	/* add released resources back to available */
         else
         {
                 if(verbose == 0 || verbose == 1)
